@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Fire Battle Stats Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #EF4444; /* Red 500 */
+            --bg-color: #111827; /* Gray 900 */
+            --card-color: #1F2937; /* Gray 800 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: #E5E7EB; /* Gray 200 */
+            min-height: 100vh;
+        }
+        .text-fire {
+            color: var(--primary-color);
+            text-shadow: 0 0 5px rgba(239, 68, 68, 0.7);
+        }
+        .stat-input {
+            background-color: #374151; /* Gray 700 */
+            border: 1px solid #4B5563; /* Gray 600 */
+            color: white;
+            padding: 8px 12px;
+        }
+        .results-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #374151;
+        }
+        .editable {
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+        .editable:hover {
+            background-color: #374151; /* Gray 700 for hover */
+        }
+        .editable:focus {
+            outline: 2px solid var(--primary-color);
+            background-color: #4B5563; /* Gray 600 for editing */
+        }
+        /* Loading Spinner Animation */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4 sm:p-8">
+
+    <div class="w-full max-w-4xl bg-gray-900 p-6 sm:p-10 rounded-xl shadow-2xl border border-gray-700">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold mb-1">
+                <span class="text-fire">FREE FIRE</span> STATS OCR
+            </h1>
+            <p class="text-gray-400 text-sm sm:text-base">Upload your match result screenshot for automatic data extraction and calculation.</p>
+        </header>
+
+        <!-- Upload Area -->
+        <div class="mb-8 p-6 bg-card-color rounded-lg border-2 border-dashed border-gray-600">
+            <label for="screenshot-upload" class="block text-center cursor-pointer">
+                <div class="flex flex-col items-center p-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-fire mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <p id="upload-text" class="text-gray-300 font-semibold">Click here to Upload Screenshot (.jpg, .png)</p>
+                </div>
+            </label>
+            <input type="file" id="screenshot-upload" class="hidden" accept="image/*" onchange="handleFileUpload(this.files)">
+
+            <div id="loading-spinner" class="mt-4 hidden justify-center items-center">
+                <div class="spinner mr-3"></div>
+                <span class="text-lg text-fire font-medium">Analyzing... This may take a moment.</span>
+            </div>
+            <div id="upload-error" class="text-center text-sm mt-4 text-yellow-500 hidden"></div>
+        </div>
+
+        <!-- Results Table -->
+        <div id="results-display" class="hidden">
+            <h2 class="text-xl font-bold mb-4 text-fire border-b border-gray-700 pb-2">Match Results (Editable)</h2>
+            <div class="results-table-container rounded-lg shadow-xl">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-800 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Player Name</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Kills (Elims)</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Kills</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">K/D (Team Avg.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body" class="bg-card-color divide-y divide-gray-700">
+                        <!-- Results injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-500 mt-3">*Click on any Player Name, Kills, or Total Kills value to correct the AI's data.</p>
+        </div>
+
+    </div>
+
+    <script>
+        const API_KEY = ""; // Kept empty for canvas
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        
+        const loader = document.getElementById('loading-spinner');
+        const uploadText = document.getElementById('upload-text');
+        const resultsDisplay = document.getElementById('results-display');
+        const resultsBody = document.getElementById('results-body');
+        const uploadError = document.getElementById('upload-error');
+        let extractedData = [];
+
+        // --- Utility Functions ---
+
+        /** Converts a File object to a Base64 string for API payload. */
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]); // Only data part
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        /** Retry mechanism for API calls. */
+        async function fetchWithRetry(url, options, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429) {
+                        if (i < maxRetries - 1) {
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                    }
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        throw new Error(`HTTP error! status: ${response.status}. Body: ${errorBody}`);
+                    }
+                    return response.json();
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+
+        // --- Core Logic ---
+
+        /** Calls the Gemini API to perform OCR and extract structured JSON data. */
+        async function fetchOCRData(base64Data, mimeType) {
+            const systemPrompt = `You are a Free Fire match result data extractor. Analyze the attached screenshot of the match results screen. Extract the data for all displayed teams/ranks.
+            
+            Schema Mandate: Return the results as a single JSON array.
+            
+            JSON Schema:
+            ARRAY of OBJECTS, where each OBJECT represents a team's result.
+            OBJECT properties:
+            - 'rank' (NUMBER): The team's final rank (1, 2, 3, etc.).
+            - 'players' (ARRAY of OBJECTS): List of all players in that team.
+            - 'total_kills' (NUMBER): The total combined eliminations for the team.
+            
+            Player OBJECT properties:
+            - 'name' (STRING): The player's in-game name.
+            - 'kills' (NUMBER): The player's individual eliminations count.
+            
+            Crucial Note: The screenshot may show two rows of two players (four total) for a single rank. Ensure all four players' data are grouped under the same rank object. Calculate 'total_kills' by summing the individual kills. Be precise with player names and kill counts.`;
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: "Extract the Free Fire match results table into the specified JSON format." },
+                            {
+                                inlineData: {
+                                    mimeType: mimeType,
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "rank": { "type": "INTEGER" },
+                                "players": {
+                                    "type": "ARRAY",
+                                    "items": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "name": { "type": "STRING" },
+                                            "kills": { "type": "INTEGER" }
+                                        }
+                                    }
+                                },
+                                "total_kills": { "type": "INTEGER" }
+                            },
+                            required: ["rank", "players", "total_kills"]
+                        }
+                    }
+                }
+            };
+
+            const response = await fetchWithRetry(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // The response text part contains the JSON string
+            const jsonString = response.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!jsonString) {
+                throw new Error("API response was missing expected JSON content.");
+            }
+            return JSON.parse(jsonString);
+        }
+
+        /** Handles file upload, state updates, and triggers OCR. */
+        async function handleFileUpload(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            
+            // UI State: Loading
+            uploadText.textContent = `File: ${file.name}`;
+            uploadError.classList.add('hidden');
+            resultsDisplay.classList.add('hidden');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+            
+            try {
+                const base64Data = await fileToBase64(file);
+                const mimeType = file.type;
+                
+                // OCR Call
+                const data = await fetchOCRData(base64Data, mimeType);
+                
+                // Store globally and render
+                extractedData = data;
+                renderResults();
+                resultsDisplay.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("OCR Error:", error);
+                uploadError.textContent = "Error during analysis. Please try a different screenshot or check the console.";
+                uploadError.classList.remove('hidden');
+            } finally {
+                // UI State: Done
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+            }
+        }
+        
+        /** Renders the extracted data into the table and attaches editing listeners. */
+        function renderResults() {
+            resultsBody.innerHTML = '';
+            
+            if (!extractedData || extractedData.length === 0) {
+                resultsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No results extracted. Please try again.</td></tr>`;
+                return;
+            }
+
+            extractedData.forEach((teamResult, teamIndex) => {
+                let teamKillsSum = 0;
+                
+                // Calculate the true total kills and find the representative name
+                teamResult.players.forEach(p => teamKillsSum += p.kills);
+
+                // Determine the team name for display (first player name)
+                const teamNameDisplay = teamResult.players[0] ? teamResult.players[0].name.split('.')[0].trim() : 'Team ' + teamResult.rank;
+
+                // Render the players in this team
+                teamResult.players.forEach((player, playerIndex) => {
+                    const row = resultsBody.insertRow();
+                    row.className = 'hover:bg-gray-700 transition duration-150';
+
+                    // Rank Cell (Grouped)
+                    if (playerIndex === 0) {
+                        row.innerHTML += `<td rowspan="${teamResult.players.length}" class="px-4 py-3 text-center text-xl font-extrabold text-fire">#${teamResult.rank}</td>`;
+                    }
+                    
+                    // Player Name Cell
+                    row.innerHTML += `<td class="px-4 py-2 text-left text-sm font-medium editable" data-field="name" data-team-index="${teamIndex}" data-player-index="${playerIndex}" contenteditable="true">${player.name}</td>`;
+                    
+                    // Individual Kills Cell
+                    row.innerHTML += `<td class="px-4 py-2 text-center text-base font-semibold editable text-yellow-400" data-field="kills" data-team-index="${teamIndex}" data-player-index="${playerIndex}" contenteditable="true" inputmode="numeric">${player.kills}</td>`;
+
+                    // Total Kills Cell (Grouped)
+                    if (playerIndex === 0) {
+                         row.innerHTML += `<td rowspan="${teamResult.players.length}" class="px-4 py-3 text-center text-lg font-bold text-green-400" id="total-kills-${teamIndex}">${teamKillsSum}</td>`;
+                    }
+                    
+                    // K/D Ratio Cell (Grouped - Mock for Single Match)
+                    if (playerIndex === 0) {
+                         // Mock KD calculation: Total Kills / (Rank * 0.1 + 1) to show high K/D for top ranks
+                        const mockKD = (teamKillsSum / (teamResult.rank * 0.1 + 1)).toFixed(2);
+                        row.innerHTML += `<td rowspan="${teamResult.players.length}" class="px-4 py-3 text-center text-lg font-bold text-blue-400">${mockKD}</td>`;
+                    }
+                });
+            });
+            
+            // Attach event listeners for inline editing
+            document.querySelectorAll('.editable').forEach(cell => {
+                cell.addEventListener('blur', handleEdit);
+                cell.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Prevent new line
+                        cell.blur(); // Trigger blur to save
+                    }
+                });
+            });
+        }
+
+        /** Handles saving the edited content back to the data model and recalculating. */
+        function handleEdit(event) {
+            const cell = event.target;
+            const teamIndex = parseInt(cell.dataset.teamIndex);
+            const playerIndex = parseInt(cell.dataset.playerIndex);
+            const field = cell.dataset.field;
+            let newValue = cell.textContent.trim();
+
+            if (field === 'kills') {
+                // Kills must be an integer
+                newValue = parseInt(newValue) || 0;
+                cell.textContent = newValue; // Update display to sanitized value
+            }
+
+            // Update the data model
+            extractedData[teamIndex].players[playerIndex][field] = newValue;
+
+            // Recalculate team kills and re-render if kills changed
+            if (field === 'kills') {
+                let newTotalKills = 0;
+                extractedData[teamIndex].players.forEach(p => {
+                    newTotalKills += (p.kills || 0);
+                });
+                
+                extractedData[teamIndex].total_kills = newTotalKills;
+
+                // Re-render the entire table to update all calculated fields (K/D, Total Kills)
+                renderResults(); 
+            }
+        }
+    </script>
+</body>
+</html>
