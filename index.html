@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Fire Battle Stats Analyzer</title>
+    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- ========================================================================= -->
+    <!-- CSS SECTION: Content for style.css (Copy this to style.css locally)        -->
+    <!-- ========================================================================= -->
     <style>
         :root {
-            --primary-color: #EF4444; /* Red 500 */
+            --primary-color: #EF4444; /* Red 500 - Fire */
+            --secondary-color: #FBBF24; /* Amber 400 - Gold */
             --bg-color: #111827; /* Gray 900 */
             --card-color: #1F2937; /* Gray 800 */
         }
@@ -22,28 +28,12 @@
             color: var(--primary-color);
             text-shadow: 0 0 5px rgba(239, 68, 68, 0.7);
         }
-        .stat-input {
-            background-color: #374151; /* Gray 700 */
-            border: 1px solid #4B5563; /* Gray 600 */
-            color: white;
-            padding: 8px 12px;
-        }
         .results-table-container {
             max-height: 500px;
             overflow-y: auto;
             border: 1px solid #374151;
         }
-        .editable {
-            cursor: pointer;
-            transition: background-color 0.1s;
-        }
-        .editable:hover {
-            background-color: #374151; /* Gray 700 for hover */
-        }
-        .editable:focus {
-            outline: 2px solid var(--primary-color);
-            background-color: #4B5563; /* Gray 600 for editing */
-        }
+        
         /* Loading Spinner Animation */
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
@@ -57,16 +47,60 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* MVP Modal Styling */
+        .mvp-modal-bg {
+             background: rgba(0, 0, 0, 0.85);
+        }
+        .mvp-banner {
+            background: linear-gradient(135deg, #1A202C 0%, #374151 100%);
+            border: 4px solid var(--secondary-color);
+            box-shadow: 0 0 40px rgba(251, 191, 36, 0.5);
+            animation: pulse 1.5s infinite alternate;
+        }
+        .mvp-title-glow {
+            text-shadow: 0 0 15px var(--primary-color);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.0); box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+            100% { transform: scale(1.02); box-shadow: 0 0 40px rgba(251, 191, 36, 0.7); }
+        }
+        .flaming-skull {
+            filter: drop-shadow(0 0 10px var(--primary-color));
+        }
     </style>
 </head>
+
+<!-- ========================================================================= -->
+<!-- HTML BODY SECTION: Main document structure                                  -->
+<!-- ========================================================================= -->
 <body class="flex flex-col items-center p-4 sm:p-8">
+
+    <!-- *** START: Local Server Warning Overlay (Keep for security context) *** -->
+    <div id="local-server-warning" class="hidden fixed inset-0 z-50 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4">
+        <div class="bg-red-700 p-8 rounded-xl shadow-2xl max-w-xl text-white border-2 border-red-400 transform transition-all duration-300 scale-100">
+            <h3 class="text-3xl font-extrabold mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                API Key Configured!
+            </h3>
+            <p class="text-sm font-semibold">
+                Your provided key has been successfully integrated. Data extraction should now proceed correctly.
+            </p>
+            <button onclick="document.getElementById('local-server-warning').classList.add('hidden');" class="mt-6 w-full bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md">
+                Dismiss Warning & Proceed
+            </button>
+        </div>
+    </div>
+    <!-- *** END: Local Server Warning Overlay *** -->
 
     <div class="w-full max-w-4xl bg-gray-900 p-6 sm:p-10 rounded-xl shadow-2xl border border-gray-700">
         <header class="text-center mb-10">
             <h1 class="text-3xl sm:text-4xl font-extrabold mb-1">
                 <span class="text-fire">FREE FIRE</span> STATS OCR
             </h1>
-            <p class="text-gray-400 text-sm sm:text-base">Upload your match result screenshot for automatic data extraction and calculation.</p>
+            <p class="text-gray-400 text-sm sm:text-base">Upload your match result screenshot for automatic data extraction and team performance calculation.</p>
         </header>
 
         <!-- Upload Area -->
@@ -76,7 +110,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-fire mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    <p id="upload-text" class="text-gray-300 font-semibold">Click here to Upload Screenshot (.jpg, .png)</p>
+                    <p id="upload-text" class="text-gray-300 font-semibold">Click here to Upload Match 1 Screenshot (.jpg, .png)</p>
                 </div>
             </label>
             <input type="file" id="screenshot-upload" class="hidden" accept="image/*" onchange="handleFileUpload(this.files)">
@@ -85,21 +119,17 @@
                 <div class="spinner mr-3"></div>
                 <span class="text-lg text-fire font-medium">Analyzing... This may take a moment.</span>
             </div>
-            <div id="upload-error" class="text-center text-sm mt-4 text-yellow-500 hidden"></div>
+            <div id="upload-error" class="text-center text-sm mt-4 text-yellow-500 hidden font-bold"></div>
         </div>
 
         <!-- Results Table -->
         <div id="results-display" class="hidden">
-            <h2 class="text-xl font-bold mb-4 text-fire border-b border-gray-700 pb-2">Match Results (Editable)</h2>
+            <h2 class="text-xl font-bold mb-4 text-fire border-b border-gray-700 pb-2">Match Results (Team View)</h2>
             <div class="results-table-container rounded-lg shadow-xl">
                 <table class="min-w-full divide-y divide-gray-700">
                     <thead class="bg-gray-800 sticky top-0">
                         <tr>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Player Name</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Kills (Elims)</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Kills</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">K/D (Team Avg.)</th>
+                            <!-- Headers dynamically set by JS -->
                         </tr>
                     </thead>
                     <tbody id="results-body" class="bg-card-color divide-y divide-gray-700">
@@ -107,48 +137,171 @@
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-gray-500 mt-3">*Click on any Player Name, Kills, or Total Kills value to correct the AI's data.</p>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div id="control-buttons" class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
+            <button id="reset-button" onclick="handleReset()" class="px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors shadow-md hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 2a8 8 0 00-7.398 4.793l.006.012a1 1 0 001.764.484l.004-.007A6 6 0 1110 16a1 1 0 100 2 8 8 0 100-16zM8 9a1 1 0 112 0v5a1 1 0 11-2 0V9z" />
+                </svg>
+                Reset All Data
+            </button>
+            <button id="next-ss-button" onclick="promptNextUpload()" class="px-6 py-3 bg-fire hover:bg-red-600 text-white font-semibold rounded-lg transition-colors shadow-md hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L6.907 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                Analyze Next Match (SS)
+            </button>
+            <button id="mvp-button" onclick="showMVP()" class="px-6 py-3 bg-secondary-color hover:bg-yellow-500 text-gray-900 font-extrabold rounded-lg transition-colors shadow-md hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.695h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.02 8.724c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.695l1.07-3.292z" />
+                </svg>
+                Show Overall MVP
+            </button>
         </div>
 
     </div>
 
+    <!-- *** START: MVP Modal/Banner *** -->
+    <div id="mvp-modal" class="fixed inset-0 mvp-modal-bg hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300" onclick="closeMVPModal()">
+        <div id="mvp-content" class="mvp-banner p-8 rounded-2xl max-w-lg w-full text-white text-center" onclick="event.stopPropagation()">
+            
+            <div class="flex flex-col items-center">
+                <!-- Free Fire Character/Icon -->
+                <svg class="w-20 h-20 text-fire mb-4 flaming-skull" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M256 0c.9 0 1.8 0 2.7 .1L343.3 54.3c35.2 2.1 66.8 20.3 90.7 48.2c16.2 19.3 27.2 40.5 32.7 62.9l13.7 54.7c2.5 9.9 1.6 20.4-2.6 29.8s-11.6 17.5-20.7 23.5l-68.7 46.1c-1.3 .9-2.7 1.6-4.1 2.2L352 384H160l-3.2-12.8c-1.4-.6-2.8-1.3-4.1-2.2L84.9 330.4c-9.1-6-16.7-14.4-20.7-23.8s-5.1-19.9-2.6-29.8l13.7-54.7c5.5-22.4 16.5-43.6 32.7-62.9c23.9-27.9 55.5-46.1 90.7-48.2L253.3 .1c.9 0 1.8 0 2.7 0zm19.8 195.1c0-1.8 1.8-3.3 4.8-4.5c.3 .1 .6 .2 .9 .4c.9 .4 1.7 1 2.5 1.6c.3 .2 .6 .4 .9 .6c1.6 1 3.2 2.1 4.7 3.3c3.4 2.8 6.7 5.8 9.9 9.1l43.8 45.4c21.2 20.9 39.5 45.5 54.2 73.1c.3 .5 .6 1 .9 1.4c2.2 3.8 4.2 7.9 5.8 12.1c.5 1.1 1.1 2.3 1.5 3.5c1 2.8 1.8 5.6 2.5 8.5c.5 2.1 .9 4.3 1.1 6.5c.1 .9 .2 1.9 .3 2.8l.2 3.4c.1 .9 .1 1.8 .1 2.8v3.4c0 1.9-.3 3.8-.8 5.6s-1.3 3.6-2.5 5.3s-2.5 3.2-4.1 4.7s-3.3 2.9-5.1 4.3c-2.4 1.8-4.9 3.4-7.5 4.9c-2.7 1.6-5.4 3-8.2 4.3c-2.8 1.2-5.7 2.3-8.7 3.2c-3 1-6 1.8-9.1 2.5c-3.1 .7-6.2 1.3-9.5 1.7c-3.2 .4-6.5 .6-9.8 .6c-3.3 0-6.6-.2-9.8-.6c-3.3-.4-6.6-1-9.8-1.7c-3.1-.7-6.1-1.5-9.1-2.5c-3-.9-5.9-2-8.7-3.2c-2.8-1.2-5.5-2.7-8.2-4.3c-2.6-1.5-5.1-3.1-7.5-4.9c-1.8-1.4-3.6-3-5.1-4.7s-2.8-3.5-4.1-5.3s-2-3.7-2.5-5.6s-.8-3.7-.8-5.6v-3.4c0-.9 0-1.8 .1-2.8l.2-3.4c.1-2.2 .5-4.4 1.1-6.5c.7-2.8 1.5-5.6 2.5-8.5c.5-1.2 1.1-2.4 1.5-3.5c1.6-4.2 3.6-8.3 5.8-12.1c.3-.5 .6-1 .9-1.4c14.7-27.6 33-52.2 54.2-73.1l43.8-45.4c3.2-3.3 6.5-6.3 9.9-9.1c1.5-1.2 3.1-2.3 4.7-3.3c.3-.2 .6-.4 .9-.6c.8-.6 1.6-1.2 2.5-1.6c.3-.2 .6-.3 .9-.4c3-.9 5.3-2.1 6.5-4.5zM224 416c0-17.7 14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32s-32-14.3-32-32z"/></svg>
+                
+                <h3 class="text-4xl font-black mb-2 uppercase mvp-title-glow tracking-widest text-secondary-color">
+                    OVERALL MVP
+                </h3>
+                <p class="text-2xl font-semibold mb-4 text-fire">Highest Kills in a Single Match</p>
+            </div>
+            
+            <div class="bg-gray-900 p-6 rounded-xl border border-gray-700">
+                <p class="text-5xl font-extrabold text-secondary-color break-words" id="mvp-player-name">---</p>
+                <p class="text-lg mt-1 mb-4 text-gray-300">The Machine</p>
+                
+                <div class="flex justify-around items-center mt-4">
+                    <div class="flex flex-col items-center">
+                        <span class="text-5xl font-black text-fire" id="mvp-kills">0</span>
+                        <span class="text-sm uppercase font-semibold text-gray-400 mt-1">KILLS</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-3xl font-bold text-gray-300" id="mvp-match">Match #0</span>
+                        <span class="text-sm uppercase font-semibold text-gray-400 mt-1">ACHIEVED IN</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeMVPModal()" class="mt-6 w-full bg-fire hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg">
+                Awesome!
+            </button>
+        </div>
+    </div>
+    <!-- *** END: MVP Modal/Banner *** -->
+
+    <!-- ========================================================================= -->
+    <!-- JAVASCRIPT SECTION: Core Logic and State Management                        -->
+    <!-- ========================================================================= -->
     <script>
-        const API_KEY = ""; // Kept empty for canvas
+        // --- API KEY CONFIGURATION ---
+        // Your provided API key has been inserted here:
+        const API_KEY = "AIzaSyDIuR-NY9tEflgQzMOOlx-CZIfQPI8A8NQ"; 
+        
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
+        // --- DOM Elements ---
         const loader = document.getElementById('loading-spinner');
         const uploadText = document.getElementById('upload-text');
         const resultsDisplay = document.getElementById('results-display');
         const resultsBody = document.getElementById('results-body');
         const uploadError = document.getElementById('upload-error');
-        let extractedData = [];
+        const resetButton = document.getElementById('reset-button');
+        const nextSSButton = document.getElementById('next-ss-button');
+        const mvpButton = document.getElementById('mvp-button');
+        const mvpModal = document.getElementById('mvp-modal');
+        
+        // --- State Variables ---
+        // Array to store results of all successfully analyzed matches
+        let matchResults = []; 
+        
+        // Stores cumulative stats, keyed by the standard team name
+        let cumulativeTeamStats = {};
 
-        // --- Utility Functions ---
 
-        /** Converts a File object to a Base64 string for API payload. */
+        // --- Utility & API Functions ---
+        
+        /** Sanitizes a player name to derive a standardized team identifier. */
+        function getTeamIdFromPlayerName(playerName) {
+            if (!playerName) return "Unknown Team";
+            // Convert to uppercase and strip common separators/tags (., -, _ etc.) and numbers
+            let standardizedName = playerName.trim().toUpperCase().replace(/[^A-Z]/g, '');
+            
+            // Heuristic 1: If the name contains a clear prefix (like 'JSE', 'AMF', 'GODL'), use that.
+            const prefixes = ['JSE', 'AMF', 'FC', 'GODL', 'LS', 'TH1', 'MADS', 'NE', 'TEROX'];
+            for (const prefix of prefixes) {
+                if (standardizedName.startsWith(prefix)) {
+                    return prefix;
+                }
+            }
+            
+            // Heuristic 2: Use the first 3-5 characters as the ID if no prefix is found.
+            // This groups players like 'Terox' and 'Terobau' under a simple prefix.
+            return standardizedName.substring(0, Math.min(5, standardizedName.length));
+        }
+
+        /** Calculates placement points based on a standard 12-point competitive BR system. */
+        function calculatePlacementPoints(rank) {
+            if (rank <= 0 || !Number.isInteger(rank)) return 0;
+            
+            // Standard 12-point system for Battle Royale (BR)
+            switch (rank) {
+                case 1: return 12;
+                case 2: return 9;
+                case 3: return 8;
+                case 4: return 7;
+                case 5: return 6;
+                case 6: return 5;
+                case 7: return 4;
+                case 8: return 3;
+                case 9: return 2;
+                case 10: return 1;
+                default: return 0; // Ranks 11 and above get 0 placement points
+            }
+        }
+
+        function checkLocalServer() {
+            // Function for development environment testing (can be ignored in Canvas)
+            const warning = document.getElementById('local-server-warning');
+            if (window.location.protocol === 'file:') {
+                // Since an API key is provided, we change the warning to a confirmation
+                warning.classList.remove('hidden');
+            }
+        }
+        
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]); // Only data part
+                reader.onload = () => resolve(reader.result.split(',')[1]);
                 reader.onerror = error => reject(error);
                 reader.readAsDataURL(file);
             });
         }
         
-        /** Retry mechanism for API calls. */
         async function fetchWithRetry(url, options, maxRetries = 3) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const response = await fetch(url, options);
-                    if (response.status === 429) {
-                        if (i < maxRetries - 1) {
+                    
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        
+                        if (response.status === 429 && i < maxRetries - 1) {
                             const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
                             await new Promise(resolve => setTimeout(resolve, delay));
                             continue;
                         }
-                    }
-                    if (!response.ok) {
-                        const errorBody = await response.text();
+                        
                         throw new Error(`HTTP error! status: ${response.status}. Body: ${errorBody}`);
                     }
                     return response.json();
@@ -158,13 +311,13 @@
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
+            throw new Error("Failed to fetch after multiple retries.");
         }
 
 
-        // --- Core Logic ---
-
-        /** Calls the Gemini API to perform OCR and extract structured JSON data. */
         async function fetchOCRData(base64Data, mimeType) {
+            // API key is now loaded from the constant, no need to check here
+            
             const systemPrompt = `You are a Free Fire match result data extractor. Analyze the attached screenshot of the match results screen. Extract the data for all displayed teams/ranks.
             
             Schema Mandate: Return the results as a single JSON array.
@@ -180,7 +333,7 @@
             - 'name' (STRING): The player's in-game name.
             - 'kills' (NUMBER): The player's individual eliminations count.
             
-            Crucial Note: The screenshot may show two rows of two players (four total) for a single rank. Ensure all four players' data are grouped under the same rank object. Calculate 'total_kills' by summing the individual kills. Be precise with player names and kill counts.`;
+            Crucial Note: Ensure all players' data are grouped under the correct rank object. Calculate 'total_kills' by summing the individual kills. Be precise with player names and kill counts.`;
 
             const payload = {
                 contents: [
@@ -228,23 +381,265 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
-            // The response text part contains the JSON string
-            const jsonString = response.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            let jsonString = response.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            // Robust parsing check (sometimes the model doesn't return clean JSON)
             if (!jsonString) {
-                throw new Error("API response was missing expected JSON content.");
+                throw new Error("API response was missing expected content.");
             }
-            return JSON.parse(jsonString);
+            
+            // Attempt to clean up common LLM output issues (e.g., surrounding markdown block)
+            jsonString = jsonString.trim();
+            if (jsonString.startsWith('```json')) {
+                jsonString = jsonString.substring(7);
+            }
+            if (jsonString.endsWith('```')) {
+                jsonString = jsonString.substring(0, jsonString.length - 3);
+            }
+            jsonString = jsonString.trim();
+
+            try {
+                return JSON.parse(jsonString);
+            } catch (e) {
+                console.error("JSON Parsing Error on Model Output:", e, "Raw Output:", jsonString);
+                throw new Error("Failed to parse the data from the AI. The output JSON was malformed.");
+            }
+        }
+        
+        // --- Core Application Functions ---
+
+        function handleReset() {
+            matchResults = [];
+            cumulativeTeamStats = {};
+            
+            // Reset UI
+            resultsBody.innerHTML = '';
+            resultsDisplay.classList.add('hidden');
+            uploadError.classList.add('hidden');
+            resetButton.classList.add('hidden');
+            nextSSButton.classList.add('hidden');
+            mvpButton.classList.add('hidden');
+            
+            uploadText.textContent = "Click here to Upload Match 1 Screenshot (.jpg, .png)";
+            document.getElementById('screenshot-upload').value = ''; // Clear file input
+            
+            // Restore default header
+            const headerRow = document.querySelector('#results-display thead tr');
+            headerRow.innerHTML = `
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team Name (Player 1)</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kills + Placement)</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Placement Pts.</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Team ID</th>
+            `;
+            
+            console.log("App reset. Ready for new match.");
         }
 
-        /** Handles file upload, state updates, and triggers OCR. */
+        function promptNextUpload() {
+            document.getElementById('screenshot-upload').click();
+            uploadText.textContent = `Waiting for Match ${matchResults.length + 1} Screenshot...`;
+            resultsDisplay.classList.add('hidden');
+            uploadError.classList.add('hidden');
+        }
+
+        function calculateCumulativeTeamStats() {
+            // Reset before recalculating
+            cumulativeTeamStats = {};
+            
+            matchResults.forEach((matchData) => {
+                matchData.forEach(team => {
+                    // Use the standardized team ID based on the first player's name
+                    const teamId = getTeamIdFromPlayerName(team.players[0] ? team.players[0].name : "");
+                    const teamKills = team.total_kills;
+                    const placementPoints = calculatePlacementPoints(team.rank);
+                    const totalPoints = teamKills + placementPoints;
+
+                    if (!cumulativeTeamStats[teamId]) {
+                        cumulativeTeamStats[teamId] = {
+                            standardName: teamId, // The standardized, short name
+                            primaryPlayerName: team.players[0] ? team.players[0].name.trim() : "Unknown Player", // The actual first player name for display
+                            totalPoints: 0, // NEW: Total Kills + Placement
+                            totalMatches: 0,
+                        };
+                    }
+
+                    // Update cumulative totals
+                    cumulativeTeamStats[teamId].totalPoints += totalPoints;
+                    cumulativeTeamStats[teamId].totalMatches += 1;
+                });
+            });
+        }
+        
+        function findOverallMVP() {
+            let bestPlayer = {
+                name: "N/A",
+                kills: -1,
+                matchNumber: 0
+            };
+
+            // Iterate through all recorded matches
+            matchResults.forEach((matchData, matchIndex) => {
+                // Ensure matchData is an array before trying to iterate
+                if (Array.isArray(matchData)) {
+                    matchData.forEach(team => {
+                        // Ensure team.players is an array
+                        if (team && Array.isArray(team.players)) {
+                            team.players.forEach(player => {
+                                // Check if the current player has more kills than the current MVP
+                                if (player && player.kills > bestPlayer.kills) {
+                                    bestPlayer = {
+                                        name: player.name ? player.name.trim() : "Unnamed Player",
+                                        kills: player.kills,
+                                        matchNumber: matchIndex + 1
+                                    };
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            return bestPlayer;
+        }
+
+        function showMVP() {
+            if (matchResults.length === 0) {
+                uploadError.textContent = "Please upload at least one match screenshot to calculate the MVP.";
+                uploadError.classList.remove('hidden');
+                return;
+            }
+
+            const mvp = findOverallMVP();
+
+            document.getElementById('mvp-player-name').textContent = mvp.name;
+            document.getElementById('mvp-kills').textContent = mvp.kills > -1 ? mvp.kills : 0;
+            document.getElementById('mvp-match').textContent = `Match #${mvp.matchNumber}`;
+            
+            mvpModal.classList.remove('hidden');
+            mvpModal.style.opacity = '1';
+        }
+
+        function closeMVPModal() {
+            mvpModal.style.opacity = '0';
+            setTimeout(() => {
+                mvpModal.classList.add('hidden');
+            }, 300); // Match CSS transition duration
+        }
+
+        window.closeMVPModal = closeMVPModal;
+        window.showMVP = showMVP;
+
+
+        /** Renders the results table, showing cumulative data if more than one match is analyzed. */
+        function renderResults() {
+            resultsBody.innerHTML = '';
+            
+            if (matchResults.length === 0) {
+                resultsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Upload a screenshot to begin analysis.</td></tr>`;
+                return;
+            }
+
+            const isCumulative = matchResults.length > 1;
+
+            // Update Header and Title
+            const matchTitleElement = document.querySelector('#results-display h2');
+            const headerRow = document.querySelector('#results-display thead tr');
+
+            if (isCumulative) {
+                // --- CUMULATIVE STATS LEADERBOARD RENDERING (Sorted by Total Points, Rank 1-12) ---
+                matchTitleElement.textContent = `Cumulative Leaderboard (${matchResults.length} Matches)`;
+                headerRow.innerHTML = `
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team ID (Example Player)</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kill + Placement)</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Matches Played</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Avg. PPM</th>
+                `;
+                
+                const teamsToRender = Object.values(cumulativeTeamStats).map(stats => ({
+                    ...stats,
+                    // Calculate AVG PPM (Points Per Match)
+                    avgPPM: (stats.totalPoints / stats.totalMatches).toFixed(2),
+                }));
+                
+                // Sort by Total Points DESCENDING (highest points up)
+                teamsToRender.sort((a, b) => b.totalPoints - a.totalPoints);
+
+                teamsToRender.forEach((teamStats, index) => {
+                     const row = resultsBody.insertRow();
+                     row.className = 'hover:bg-gray-700 transition duration-150';
+                     
+                     const rank = index + 1;
+                     const rankClass = rank === 1 ? 'text-secondary-color text-2xl' : (rank <= 3 ? 'text-yellow-500 text-xl' : 'text-fire');
+
+                     // Rank
+                     row.innerHTML += `<td class="px-4 py-3 text-center font-extrabold ${rankClass}">#${rank}</td>`;
+
+                     // Team ID / Example Player Name
+                     row.innerHTML += `<td class="px-4 py-2 text-left text-base font-medium break-words">
+                        <span class="font-bold text-fire">${teamStats.standardName}</span>
+                        <span class="text-xs text-gray-400 block">(${teamStats.primaryPlayerName})</span>
+                     </td>`;
+                     
+                     // Total Points (Overall Points)
+                     row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-black text-yellow-400">${teamStats.totalPoints}</td>`;
+
+                     // Matches Played
+                     row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-gray-300">${teamStats.totalMatches}</td>`;
+                     
+                     // Avg. PPM
+                     row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-blue-400">${teamStats.avgPPM}</td>`;
+                });
+
+                if (teamsToRender.length === 0) {
+                     resultsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No team data extracted yet.</td></tr>`;
+                }
+
+
+            } else {
+                // --- SINGLE MATCH (TEAM-ONLY) RENDERING ---
+                matchTitleElement.textContent = `Match 1 Results (Team View)`;
+                headerRow.innerHTML = `
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team Name (Player 1)</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kills + Placement)</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Kills</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Placement Pts.</th>
+                `;
+
+                const singleMatchResult = matchResults[0];
+
+                // Sort by rank for single match view
+                singleMatchResult.sort((a, b) => a.rank - b.rank);
+
+                singleMatchResult.forEach((teamResult) => {
+                    const row = resultsBody.insertRow();
+                    row.className = 'hover:bg-gray-700 transition duration-150';
+                    
+                    const player1Name = teamResult.players[0] ? teamResult.players[0].name.trim() : "N/A";
+                    const placementPts = calculatePlacementPoints(teamResult.rank);
+                    const totalPts = teamResult.total_kills + placementPts;
+                    // const teamId = getTeamIdFromPlayerName(player1Name);
+
+                    row.innerHTML += `<td class="px-4 py-3 text-center text-xl font-extrabold text-fire">#${teamResult.rank}</td>`;
+                    row.innerHTML += `<td class="px-4 py-3 text-left text-base font-medium break-words">${player1Name}</td>`;
+                    row.innerHTML += `<td class="px-4 py-3 text-center text-lg font-black text-yellow-400">${totalPts}</td>`;
+                    row.innerHTML += `<td class="px-4 py-3 text-center text-base font-semibold text-gray-300">${teamResult.total_kills}</td>`; // Team Kills
+                    row.innerHTML += `<td class="px-4 py-3 text-center text-lg font-bold text-blue-400">${placementPts}</td>`;
+                });
+            }
+        }
+
+
         async function handleFileUpload(files) {
             if (files.length === 0) return;
             
             const file = files[0];
             
             // UI State: Loading
-            uploadText.textContent = `File: ${file.name}`;
+            const currentMatchNumber = matchResults.length + 1;
+            uploadText.textContent = `Analyzing Match ${currentMatchNumber}: ${file.name}`;
             uploadError.classList.add('hidden');
             resultsDisplay.classList.add('hidden');
             loader.classList.remove('hidden');
@@ -254,115 +649,35 @@
                 const base64Data = await fileToBase64(file);
                 const mimeType = file.type;
                 
-                // OCR Call
                 const data = await fetchOCRData(base64Data, mimeType);
                 
-                // Store globally and render
-                extractedData = data;
+                matchResults.push(data);
+                
+                calculateCumulativeTeamStats();
+                
                 renderResults();
                 resultsDisplay.classList.remove('hidden');
 
+                // Update control buttons
+                resetButton.classList.remove('hidden');
+                nextSSButton.classList.remove('hidden'); 
+                mvpButton.classList.remove('hidden');
+                uploadText.textContent = `Match ${matchResults.length} Analyzed! Ready for next match.`;
+
             } catch (error) {
                 console.error("OCR Error:", error);
-                uploadError.textContent = "Error during analysis. Please try a different screenshot or check the console.";
+                
+                uploadError.textContent = `Error during analysis. Please try a clearer screenshot. Details: ${error.message}`;
                 uploadError.classList.remove('hidden');
+                document.getElementById('screenshot-upload').value = '';
             } finally {
                 // UI State: Done
                 loader.classList.add('hidden');
                 loader.classList.remove('flex');
             }
         }
-        
-        /** Renders the extracted data into the table and attaches editing listeners. */
-        function renderResults() {
-            resultsBody.innerHTML = '';
-            
-            if (!extractedData || extractedData.length === 0) {
-                resultsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No results extracted. Please try again.</td></tr>`;
-                return;
-            }
 
-            extractedData.forEach((teamResult, teamIndex) => {
-                let teamKillsSum = 0;
-                
-                // Calculate the true total kills and find the representative name
-                teamResult.players.forEach(p => teamKillsSum += p.kills);
-
-                // Determine the team name for display (first player name)
-                const teamNameDisplay = teamResult.players[0] ? teamResult.players[0].name.split('.')[0].trim() : 'Team ' + teamResult.rank;
-
-                // Render the players in this team
-                teamResult.players.forEach((player, playerIndex) => {
-                    const row = resultsBody.insertRow();
-                    row.className = 'hover:bg-gray-700 transition duration-150';
-
-                    // Rank Cell (Grouped)
-                    if (playerIndex === 0) {
-                        row.innerHTML += `<td rowspan="${teamResult.players.length}" class="px-4 py-3 text-center text-xl font-extrabold text-fire">#${teamResult.rank}</td>`;
-                    }
-                    
-                    // Player Name Cell
-                    row.innerHTML += `<td class="px-4 py-2 text-left text-sm font-medium editable" data-field="name" data-team-index="${teamIndex}" data-player-index="${playerIndex}" contenteditable="true">${player.name}</td>`;
-                    
-                    // Individual Kills Cell
-                    row.innerHTML += `<td class="px-4 py-2 text-center text-base font-semibold editable text-yellow-400" data-field="kills" data-team-index="${teamIndex}" data-player-index="${playerIndex}" contenteditable="true" inputmode="numeric">${player.kills}</td>`;
-
-                    // Total Kills Cell (Grouped)
-                    if (playerIndex === 0) {
-                         row.innerHTML += `<td rowspan="${teamResult.players.length}" class="px-4 py-3 text-center text-lg font-bold text-green-400" id="total-kills-${teamIndex}">${teamKillsSum}</td>`;
-                    }
-                    
-                    // K/D Ratio Cell (Grouped - Mock for Single Match)
-                    if (playerIndex === 0) {
-                         // Mock KD calculation: Total Kills / (Rank * 0.1 + 1) to show high K/D for top ranks
-                        const mockKD = (teamKillsSum / (teamResult.rank * 0.1 + 1)).toFixed(2);
-                        row.innerHTML += `<td rowspan="${teamResult.players.length}" class="px-4 py-3 text-center text-lg font-bold text-blue-400">${mockKD}</td>`;
-                    }
-                });
-            });
-            
-            // Attach event listeners for inline editing
-            document.querySelectorAll('.editable').forEach(cell => {
-                cell.addEventListener('blur', handleEdit);
-                cell.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault(); // Prevent new line
-                        cell.blur(); // Trigger blur to save
-                    }
-                });
-            });
-        }
-
-        /** Handles saving the edited content back to the data model and recalculating. */
-        function handleEdit(event) {
-            const cell = event.target;
-            const teamIndex = parseInt(cell.dataset.teamIndex);
-            const playerIndex = parseInt(cell.dataset.playerIndex);
-            const field = cell.dataset.field;
-            let newValue = cell.textContent.trim();
-
-            if (field === 'kills') {
-                // Kills must be an integer
-                newValue = parseInt(newValue) || 0;
-                cell.textContent = newValue; // Update display to sanitized value
-            }
-
-            // Update the data model
-            extractedData[teamIndex].players[playerIndex][field] = newValue;
-
-            // Recalculate team kills and re-render if kills changed
-            if (field === 'kills') {
-                let newTotalKills = 0;
-                extractedData[teamIndex].players.forEach(p => {
-                    newTotalKills += (p.kills || 0);
-                });
-                
-                extractedData[teamIndex].total_kills = newTotalKills;
-
-                // Re-render the entire table to update all calculated fields (K/D, Total Kills)
-                renderResults(); 
-            }
-        }
+        window.onload = checkLocalServer;
     </script>
 </body>
 </html>
