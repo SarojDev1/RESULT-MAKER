@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <!-- ========================================================================= -->
-    <!-- CSS SECTION: Content for style.css (Copy this to style.css locally)        -->
+    <!-- CSS SECTION: Content for style.css                                        -->
     <!-- ========================================================================= -->
     <style>
         :root {
@@ -68,34 +68,50 @@
         .flaming-skull {
             filter: drop-shadow(0 0 10px var(--primary-color));
         }
+
+        .login-card {
+            background-color: var(--card-color);
+            border: 1px solid #374151;
+        }
     </style>
 </head>
 
 <!-- ========================================================================= -->
 <!-- HTML BODY SECTION: Main document structure                                  -->
 <!-- ========================================================================= -->
-<body class="flex flex-col items-center p-4 sm:p-8">
+<body class="flex flex-col items-center justify-center p-4 sm:p-8">
 
-    <!-- *** START: Local Server Warning Overlay (Keep for security context) *** -->
-    <div id="local-server-warning" class="hidden fixed inset-0 z-50 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4">
-        <div class="bg-red-700 p-8 rounded-xl shadow-2xl max-w-xl text-white border-2 border-red-400 transform transition-all duration-300 scale-100">
-            <h3 class="text-3xl font-extrabold mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                API Key Configured!
-            </h3>
-            <p class="text-sm font-semibold">
-                Your provided key has been successfully integrated. Data extraction should now proceed correctly.
-            </p>
-            <button onclick="document.getElementById('local-server-warning').classList.add('hidden');" class="mt-6 w-full bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md">
-                Dismiss Warning & Proceed
-            </button>
+    <!-- Login Container (Default View) -->
+    <div id="login-container" class="w-full max-w-sm hidden">
+        <div class="login-card p-8 rounded-xl shadow-2xl">
+            <h1 class="text-3xl font-extrabold text-center mb-6">
+                <span class="text-fire">LOGIN</span> REQUIRED
+            </h1>
+            <p class="text-gray-400 text-center mb-8 text-sm">Use the provided demo credentials to access the analyzer.</p>
+            
+            <form id="login-form">
+                <div class="mb-5">
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="sarojxettri46@gmail.com"
+                           class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire transition-colors">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="saroj123"
+                           class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire transition-colors">
+                </div>
+                
+                <div id="login-error" class="text-center text-sm text-yellow-500 mb-4 hidden font-bold"></div>
+
+                <button type="submit" class="w-full py-3 bg-fire hover:bg-red-600 text-white font-extrabold rounded-lg transition-colors shadow-md">
+                    Log In
+                </button>
+            </form>
         </div>
     </div>
-    <!-- *** END: Local Server Warning Overlay *** -->
-
-    <div class="w-full max-w-4xl bg-gray-900 p-6 sm:p-10 rounded-xl shadow-2xl border border-gray-700">
+    
+    <!-- App Container (Hidden by default, shown after login) -->
+    <div id="app-container" class="w-full max-w-4xl bg-gray-900 p-6 sm:p-10 rounded-xl shadow-2xl border border-gray-700 hidden">
         <header class="text-center mb-10">
             <h1 class="text-3xl sm:text-4xl font-extrabold mb-1">
                 <span class="text-fire">FREE FIRE</span> STATS OCR
@@ -123,17 +139,21 @@
         </div>
 
         <!-- Results Table -->
-        <div id="results-display" class="hidden">
-            <h2 class="text-xl font-bold mb-4 text-fire border-b border-gray-700 pb-2">Match Results (Team View)</h2>
+        <div id="results-display" class="">
+            <h2 class="text-xl font-bold mb-4 text-fire border-b border-gray-700 pb-2">Match Results</h2>
             <div class="results-table-container rounded-lg shadow-xl">
                 <table class="min-w-full divide-y divide-gray-700">
                     <thead class="bg-gray-800 sticky top-0">
                         <tr>
-                            <!-- Headers dynamically set by JS -->
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team Name (Player 1)</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kills + Placement)</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Kills</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Placement Pts.</th>
                         </tr>
                     </thead>
                     <tbody id="results-body" class="bg-card-color divide-y divide-gray-700">
-                        <!-- Results injected here -->
+                        <!-- Results injected here or placeholder text -->
                     </tbody>
                 </table>
             </div>
@@ -141,19 +161,19 @@
         
         <!-- Control Buttons -->
         <div id="control-buttons" class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
-            <button id="reset-button" onclick="handleReset()" class="px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors shadow-md hidden">
+            <button id="reset-button" onclick="handleReset()" class="px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M10 2a8 8 0 00-7.398 4.793l.006.012a1 1 0 001.764.484l.004-.007A6 6 0 1110 16a1 1 0 100 2 8 8 0 100-16zM8 9a1 1 0 112 0v5a1 1 0 11-2 0V9z" />
                 </svg>
                 Reset All Data
             </button>
-            <button id="next-ss-button" onclick="promptNextUpload()" class="px-6 py-3 bg-fire hover:bg-red-600 text-white font-semibold rounded-lg transition-colors shadow-md hidden">
+            <button id="next-ss-button" onclick="promptNextUpload()" class="px-6 py-3 bg-fire hover:bg-red-600 text-white font-semibold rounded-lg transition-colors shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L6.907 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                 </svg>
                 Analyze Next Match (SS)
             </button>
-            <button id="mvp-button" onclick="showMVP()" class="px-6 py-3 bg-secondary-color hover:bg-yellow-500 text-gray-900 font-extrabold rounded-lg transition-colors shadow-md hidden">
+            <button id="mvp-button" onclick="showMVP()" class="px-6 py-3 bg-secondary-color hover:bg-yellow-500 text-gray-900 font-extrabold rounded-lg transition-colors shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.695h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.02 8.724c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.695l1.07-3.292z" />
                 </svg>
@@ -169,7 +189,7 @@
             
             <div class="flex flex-col items-center">
                 <!-- Free Fire Character/Icon -->
-                <svg class="w-20 h-20 text-fire mb-4 flaming-skull" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M256 0c.9 0 1.8 0 2.7 .1L343.3 54.3c35.2 2.1 66.8 20.3 90.7 48.2c16.2 19.3 27.2 40.5 32.7 62.9l13.7 54.7c2.5 9.9 1.6 20.4-2.6 29.8s-11.6 17.5-20.7 23.5l-68.7 46.1c-1.3 .9-2.7 1.6-4.1 2.2L352 384H160l-3.2-12.8c-1.4-.6-2.8-1.3-4.1-2.2L84.9 330.4c-9.1-6-16.7-14.4-20.7-23.8s-5.1-19.9-2.6-29.8l13.7-54.7c5.5-22.4 16.5-43.6 32.7-62.9c23.9-27.9 55.5-46.1 90.7-48.2L253.3 .1c.9 0 1.8 0 2.7 0zm19.8 195.1c0-1.8 1.8-3.3 4.8-4.5c.3 .1 .6 .2 .9 .4c.9 .4 1.7 1 2.5 1.6c.3 .2 .6 .4 .9 .6c1.6 1 3.2 2.1 4.7 3.3c3.4 2.8 6.7 5.8 9.9 9.1l43.8 45.4c21.2 20.9 39.5 45.5 54.2 73.1c.3 .5 .6 1 .9 1.4c2.2 3.8 4.2 7.9 5.8 12.1c.5 1.1 1.1 2.3 1.5 3.5c1 2.8 1.8 5.6 2.5 8.5c.5 2.1 .9 4.3 1.1 6.5c.1 .9 .2 1.9 .3 2.8l.2 3.4c.1 .9 .1 1.8 .1 2.8v3.4c0 1.9-.3 3.8-.8 5.6s-1.3 3.6-2.5 5.3s-2.5 3.2-4.1 4.7s-3.3 2.9-5.1 4.3c-2.4 1.8-4.9 3.4-7.5 4.9c-2.7 1.6-5.4 3-8.2 4.3c-2.8 1.2-5.7 2.3-8.7 3.2c-3 1-6 1.8-9.1 2.5c-3.1 .7-6.2 1.3-9.5 1.7c-3.2 .4-6.5 .6-9.8 .6c-3.3 0-6.6-.2-9.8-.6c-3.3-.4-6.6-1-9.8-1.7c-3.1-.7-6.1-1.5-9.1-2.5c-3-.9-5.9-2-8.7-3.2c-2.8-1.2-5.5-2.7-8.2-4.3c-2.6-1.5-5.1-3.1-7.5-4.9c-1.8-1.4-3.6-3-5.1-4.7s-2.8-3.5-4.1-5.3s-2-3.7-2.5-5.6s-.8-3.7-.8-5.6v-3.4c0-.9 0-1.8 .1-2.8l.2-3.4c.1-2.2 .5-4.4 1.1-6.5c.7-2.8 1.5-5.6 2.5-8.5c.5-1.2 1.1-2.4 1.5-3.5c1.6-4.2 3.6-8.3 5.8-12.1c.3-.5 .6-1 .9-1.4c14.7-27.6 33-52.2 54.2-73.1l43.8-45.4c3.2-3.3 6.5-6.3 9.9-9.1c1.5-1.2 3.1-2.3 4.7-3.3c.3-.2 .6-.4 .9-.6c.8-.6 1.6-1.2 2.5-1.6c.3-.2 .6-.3 .9-.4c3-.9 5.3-2.1 6.5-4.5zM224 416c0-17.7 14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32s-32-14.3-32-32z"/></svg>
+                <svg class="w-20 h-20 text-fire mb-4 flaming-skull" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0c.9 0 1.8 0 2.7 .1L343.3 54.3c35.2 2.1 66.8 20.3 90.7 48.2c16.2 19.3 27.2 40.5 32.7 62.9l13.7 54.7c2.5 9.9 1.6 20.4-2.6 29.8s-11.6 17.5-20.7 23.5l-68.7 46.1c-1.3 .9-2.7 1.6-4.1 2.2L352 384H160l-3.2-12.8c-1.4-.6-2.8-1.3-4.1-2.2L84.9 330.4c-9.1-6-16.7-14.4-20.7-23.8s-5.1-19.9-2.6-29.8l13.7-54.7c5.5-22.4 16.5-43.6 32.7-62.9c23.9-27.9 55.5-46.1 90.7-48.2L253.3 .1c.9 0 1.8 0 2.7 0zm19.8 195.1c0-1.8 1.8-3.3 4.8-4.5c.3 .1 .6 .2 .9 .4c.9 .4 1.7 1 2.5 1.6c.3 .2 .6 .4 .9 .6c1.6 1 3.2 2.1 4.7 3.3c3.4 2.8 6.7 5.8 9.9 9.1l43.8 45.4c21.2 20.9 39.5 45.5 54.2 73.1c.3 .5 .6 1 .9 1.4c2.2 3.8 4.2 7.9 5.8 12.1c.5 1.1 1.1 2.3 1.5 3.5c1 2.8 1.8 5.6 2.5 8.5c.5 2.1 .9 4.3 1.1 6.5c.1 .9 .2 1.9 .3 2.8l.2 3.4c.1 .9 .1 1.8 .1 2.8v3.4c0 1.9-.3 3.8-.8 5.6s-1.3 3.6-2.5 5.3s-2.5 3.2-4.1 4.7s-3.3 2.9-5.1 4.3c-2.4 1.8-4.9 3.4-7.5 4.9c-2.7 1.6-5.4 3-8.2 4.3c-2.8 1.2-5.7 2.3-8.7 3.2c-3 1-6 1.8-9.1 2.5c-3.1 .7-6.2 1.3-9.5 1.7c-3.2 .4-6.5 .6-9.8 .6c-3.3 0-6.6-.2-9.8-.6c-3.3-.4-6.6-1-9.8-1.7c-3.1-.7-6.1-1.5-9.1-2.5c-3-.9-5.9-2-8.7-3.2c-2.8-1.2-5.5-2.7-8.2-4.3c-2.6-1.5-5.1-3.1-7.5-4.9c-1.8-1.4-3.6-3-5.1-4.7s-2.8-3.5-4.1-5.3s-2-3.7-2.5-5.6s-.8-3.7-.8-5.6v-3.4c0-.9 0-1.8 .1-2.8l.2-3.4c.1-2.2 .5-4.4 1.1-6.5c.7-2.8 1.5-5.6 2.5-8.5c.5-1.2 1.1-2.4 1.5-3.5c1.6-4.2 3.6-8.3 5.8-12.1c.3-.5 .6-1 .9-1.4c14.7-27.6 33-52.2 54.2-73.1l43.8-45.4c3.2-3.3 6.5-6.3 9.9-9.1c1.5-1.2 3.1-2.3 4.7-3.3c.3-.2 .6-.4 .9-.6c.8-.6 1.6-1.2 2.5-1.6c.3-.2 .6-.3 .9-.4c3-.9 5.3-2.1 6.5-4.5zM224 416c0-17.7 14.3-32 32-32s32 14.3 32 32s-32 14.3-32 32s-32-14.3-32-32z"/></svg>
                 
                 <h3 class="text-4xl font-black mb-2 uppercase mvp-title-glow tracking-widest text-secondary-color">
                     OVERALL MVP
@@ -203,14 +223,38 @@
     <!-- ========================================================================= -->
     <!-- JAVASCRIPT SECTION: Core Logic and State Management                        -->
     <!-- ========================================================================= -->
-    <script>
+    <script type="module">
+        // FIX FOR LOCAL DEVELOPMENT: Safely import Firebase Modules
+        // These imports use ES6 modules and require a web server (like Live Server)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
         // --- API KEY CONFIGURATION ---
-        // Your provided API key has been inserted here:
+        // !!! CRITICAL FIX: You must replace the empty string below with your actual Gemini API Key !!!
         const API_KEY = "AIzaSyDIuR-NY9tEflgQzMOOlx-CZIfQPI8A8NQ"; 
-        
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
+        // --- FIREBASE CONFIGURATION (FIXED FOR LOCAL EXECUTION) ---
+        // We define placeholder global variables if they are not present (i.e., when running locally)
+        
+        // Define dummy config for local testing if global variable is missing
+        const defaultFirebaseConfig = {
+             apiKey: "AIzaSy_LOCAL_TESTING_KEY",
+             authDomain: "local-testing.firebaseapp.com",
+             projectId: "local-testing" 
+        };
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultFirebaseConfig;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
         // --- DOM Elements ---
+        const loginContainer = document.getElementById('login-container');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
         const loader = document.getElementById('loading-spinner');
         const uploadText = document.getElementById('upload-text');
         const resultsDisplay = document.getElementById('results-display');
@@ -222,39 +266,92 @@
         const mvpModal = document.getElementById('mvp-modal');
         
         // --- State Variables ---
-        // Array to store results of all successfully analyzed matches
+        // Initializing with an empty array so the placeholder message shows on load.
         let matchResults = []; 
         
-        // Stores cumulative stats, keyed by the standard team name
         let cumulativeTeamStats = {};
 
+        // --- AUTHENTICATION LOGIC ---
 
-        // --- Utility & API Functions ---
+        // The specific credentials the user wants to use for the demo login
+        const DEMO_EMAIL = "sarojxettri46@gmail.com";
+        const DEMO_PASSWORD = "saroj123";
+
+        /**
+         * Simulates a login check for the demo environment. 
+         * If credentials match, sign in anonymously to proceed to the app.
+         */
+        async function handleLogin(e) {
+            e.preventDefault();
+            loginError.classList.add('hidden');
+            
+            const emailInput = document.getElementById('email').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+
+            if (emailInput === DEMO_EMAIL && passwordInput === DEMO_PASSWORD) {
+                // If credentials match the hardcoded demo values, sign in anonymously
+                // to proceed to the main app interface.
+                try {
+                    // NOTE: If using the default config, this sign-in will fail 
+                    // but the app should still proceed to the main screen 
+                    // thanks to the onAuthStateChanged logic below.
+                    await signInAnonymously(auth);
+                    // onAuthStateChanged will handle the view switch
+                } catch (error) {
+                    // For local testing, we ignore the anonymous sign-in failure 
+                    // but allow the app to proceed if the credentials are correct.
+                    console.log("Anonymous Sign-In failed (expected in local dev/mockup):", error.message);
+                    
+                    // Manually force the view switch for local testing 
+                    // since Firebase Auth might not fully initialize/complete the sign-in
+                    // when using a dummy configuration.
+                    if (firebaseConfig === defaultFirebaseConfig) {
+                        loginContainer.classList.add('hidden');
+                        appContainer.classList.remove('hidden');
+                        initializeAppAfterAuth();
+                    }
+                }
+            } else {
+                loginError.textContent = "Invalid credentials. Please use the demo email and password.";
+                loginError.classList.remove('hidden');
+            }
+        }
         
-        /** Sanitizes a player name to derive a standardized team identifier. */
+        // Event listener for the login form submission
+        loginForm.addEventListener('submit', handleLogin);
+
+
+        /** Handles switching the view between the Login Page and the Main App. */
+        onAuthStateChanged(auth, (user) => {
+            // Only switch views automatically if the user object is valid (i.e., signed in)
+            if (user && user.uid) { 
+                loginContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                initializeAppAfterAuth();
+            } else {
+                // If no user is authenticated, show the login form
+                appContainer.classList.add('hidden');
+                loginContainer.classList.remove('hidden');
+            }
+        });
+
+
+        // --- Utility & API Functions (Same as before, moved into a module) ---
+        
         function getTeamIdFromPlayerName(playerName) {
             if (!playerName) return "Unknown Team";
-            // Convert to uppercase and strip common separators/tags (., -, _ etc.) and numbers
             let standardizedName = playerName.trim().toUpperCase().replace(/[^A-Z]/g, '');
-            
-            // Heuristic 1: If the name contains a clear prefix (like 'JSE', 'AMF', 'GODL'), use that.
             const prefixes = ['JSE', 'AMF', 'FC', 'GODL', 'LS', 'TH1', 'MADS', 'NE', 'TEROX'];
             for (const prefix of prefixes) {
                 if (standardizedName.startsWith(prefix)) {
                     return prefix;
                 }
             }
-            
-            // Heuristic 2: Use the first 3-5 characters as the ID if no prefix is found.
-            // This groups players like 'Terox' and 'Terobau' under a simple prefix.
             return standardizedName.substring(0, Math.min(5, standardizedName.length));
         }
 
-        /** Calculates placement points based on a standard 12-point competitive BR system. */
         function calculatePlacementPoints(rank) {
             if (rank <= 0 || !Number.isInteger(rank)) return 0;
-            
-            // Standard 12-point system for Battle Royale (BR)
             switch (rank) {
                 case 1: return 12;
                 case 2: return 9;
@@ -266,19 +363,10 @@
                 case 8: return 3;
                 case 9: return 2;
                 case 10: return 1;
-                default: return 0; // Ranks 11 and above get 0 placement points
+                default: return 0;
             }
         }
 
-        function checkLocalServer() {
-            // Function for development environment testing (can be ignored in Canvas)
-            const warning = document.getElementById('local-server-warning');
-            if (window.location.protocol === 'file:') {
-                // Since an API key is provided, we change the warning to a confirmation
-                warning.classList.remove('hidden');
-            }
-        }
-        
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -295,13 +383,11 @@
                     
                     if (!response.ok) {
                         const errorBody = await response.text();
-                        
                         if (response.status === 429 && i < maxRetries - 1) {
                             const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
                             await new Promise(resolve => setTimeout(resolve, delay));
                             continue;
                         }
-                        
                         throw new Error(`HTTP error! status: ${response.status}. Body: ${errorBody}`);
                     }
                     return response.json();
@@ -316,8 +402,12 @@
 
 
         async function fetchOCRData(base64Data, mimeType) {
-            // API key is now loaded from the constant, no need to check here
             
+            // Check if API key is present before calling
+            if (API_KEY === "") {
+                throw new Error("API Key is missing. Please update the 'API_KEY' constant in the code.");
+            }
+
             const systemPrompt = `You are a Free Fire match result data extractor. Analyze the attached screenshot of the match results screen. Extract the data for all displayed teams/ranks.
             
             Schema Mandate: Return the results as a single JSON array.
@@ -384,12 +474,10 @@
             
             let jsonString = response.candidates?.[0]?.content?.parts?.[0]?.text;
             
-            // Robust parsing check (sometimes the model doesn't return clean JSON)
             if (!jsonString) {
                 throw new Error("API response was missing expected content.");
             }
             
-            // Attempt to clean up common LLM output issues (e.g., surrounding markdown block)
             jsonString = jsonString.trim();
             if (jsonString.startsWith('```json')) {
                 jsonString = jsonString.substring(7);
@@ -409,48 +497,30 @@
         
         // --- Core Application Functions ---
 
-        function handleReset() {
+        window.handleReset = function() {
             matchResults = [];
             cumulativeTeamStats = {};
-            
-            // Reset UI
             resultsBody.innerHTML = '';
-            resultsDisplay.classList.add('hidden');
+            resultsDisplay.classList.remove('hidden');
             uploadError.classList.add('hidden');
-            resetButton.classList.add('hidden');
-            nextSSButton.classList.add('hidden');
-            mvpButton.classList.add('hidden');
-            
             uploadText.textContent = "Click here to Upload Match 1 Screenshot (.jpg, .png)";
-            document.getElementById('screenshot-upload').value = ''; // Clear file input
-            
-            // Restore default header
-            const headerRow = document.querySelector('#results-display thead tr');
-            headerRow.innerHTML = `
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team Name (Player 1)</th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kills + Placement)</th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Placement Pts.</th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Team ID</th>
-            `;
-            
+            document.getElementById('screenshot-upload').value = '';
+            renderResults(); 
             console.log("App reset. Ready for new match.");
         }
 
-        function promptNextUpload() {
+        window.promptNextUpload = function() {
             document.getElementById('screenshot-upload').click();
+            resultsDisplay.classList.add('hidden'); 
             uploadText.textContent = `Waiting for Match ${matchResults.length + 1} Screenshot...`;
-            resultsDisplay.classList.add('hidden');
             uploadError.classList.add('hidden');
         }
 
         function calculateCumulativeTeamStats() {
-            // Reset before recalculating
             cumulativeTeamStats = {};
             
             matchResults.forEach((matchData) => {
                 matchData.forEach(team => {
-                    // Use the standardized team ID based on the first player's name
                     const teamId = getTeamIdFromPlayerName(team.players[0] ? team.players[0].name : "");
                     const teamKills = team.total_kills;
                     const placementPoints = calculatePlacementPoints(team.rank);
@@ -458,14 +528,13 @@
 
                     if (!cumulativeTeamStats[teamId]) {
                         cumulativeTeamStats[teamId] = {
-                            standardName: teamId, // The standardized, short name
-                            primaryPlayerName: team.players[0] ? team.players[0].name.trim() : "Unknown Player", // The actual first player name for display
-                            totalPoints: 0, // NEW: Total Kills + Placement
+                            standardName: teamId, 
+                            primaryPlayerName: team.players[0] ? team.players[0].name.trim() : "Unknown Player", 
+                            totalPoints: 0, 
                             totalMatches: 0,
                         };
                     }
 
-                    // Update cumulative totals
                     cumulativeTeamStats[teamId].totalPoints += totalPoints;
                     cumulativeTeamStats[teamId].totalMatches += 1;
                 });
@@ -479,15 +548,11 @@
                 matchNumber: 0
             };
 
-            // Iterate through all recorded matches
             matchResults.forEach((matchData, matchIndex) => {
-                // Ensure matchData is an array before trying to iterate
                 if (Array.isArray(matchData)) {
                     matchData.forEach(team => {
-                        // Ensure team.players is an array
                         if (team && Array.isArray(team.players)) {
                             team.players.forEach(player => {
-                                // Check if the current player has more kills than the current MVP
                                 if (player && player.kills > bestPlayer.kills) {
                                     bestPlayer = {
                                         name: player.name ? player.name.trim() : "Unnamed Player",
@@ -503,7 +568,7 @@
             return bestPlayer;
         }
 
-        function showMVP() {
+        window.showMVP = function() {
             if (matchResults.length === 0) {
                 uploadError.textContent = "Please upload at least one match screenshot to calculate the MVP.";
                 uploadError.classList.remove('hidden');
@@ -520,34 +585,28 @@
             mvpModal.style.opacity = '1';
         }
 
-        function closeMVPModal() {
+        window.closeMVPModal = function() {
             mvpModal.style.opacity = '0';
             setTimeout(() => {
                 mvpModal.classList.add('hidden');
-            }, 300); // Match CSS transition duration
+            }, 300); 
         }
 
-        window.closeMVPModal = closeMVPModal;
-        window.showMVP = showMVP;
-
-
-        /** Renders the results table, showing cumulative data if more than one match is analyzed. */
         function renderResults() {
             resultsBody.innerHTML = '';
             
             if (matchResults.length === 0) {
+                // This is the placeholder text when no data has been uploaded yet
                 resultsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Upload a screenshot to begin analysis.</td></tr>`;
+                document.querySelector('#results-display h2').textContent = `Match Results`;
                 return;
             }
 
             const isCumulative = matchResults.length > 1;
-
-            // Update Header and Title
             const matchTitleElement = document.querySelector('#results-display h2');
             const headerRow = document.querySelector('#results-display thead tr');
 
             if (isCumulative) {
-                // --- CUMULATIVE STATS LEADERBOARD RENDERING (Sorted by Total Points, Rank 1-12) ---
                 matchTitleElement.textContent = `Cumulative Leaderboard (${matchResults.length} Matches)`;
                 headerRow.innerHTML = `
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
@@ -559,36 +618,23 @@
                 
                 const teamsToRender = Object.values(cumulativeTeamStats).map(stats => ({
                     ...stats,
-                    // Calculate AVG PPM (Points Per Match)
                     avgPPM: (stats.totalPoints / stats.totalMatches).toFixed(2),
                 }));
                 
-                // Sort by Total Points DESCENDING (highest points up)
                 teamsToRender.sort((a, b) => b.totalPoints - a.totalPoints);
 
                 teamsToRender.forEach((teamStats, index) => {
                      const row = resultsBody.insertRow();
                      row.className = 'hover:bg-gray-700 transition duration-150';
-                     
                      const rank = index + 1;
                      const rankClass = rank === 1 ? 'text-secondary-color text-2xl' : (rank <= 3 ? 'text-yellow-500 text-xl' : 'text-fire');
-
-                     // Rank
                      row.innerHTML += `<td class="px-4 py-3 text-center font-extrabold ${rankClass}">#${rank}</td>`;
-
-                     // Team ID / Example Player Name
                      row.innerHTML += `<td class="px-4 py-2 text-left text-base font-medium break-words">
                         <span class="font-bold text-fire">${teamStats.standardName}</span>
                         <span class="text-xs text-gray-400 block">(${teamStats.primaryPlayerName})</span>
                      </td>`;
-                     
-                     // Total Points (Overall Points)
                      row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-black text-yellow-400">${teamStats.totalPoints}</td>`;
-
-                     // Matches Played
                      row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-gray-300">${teamStats.totalMatches}</td>`;
-                     
-                     // Avg. PPM
                      row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-blue-400">${teamStats.avgPPM}</td>`;
                 });
 
@@ -598,8 +644,7 @@
 
 
             } else {
-                // --- SINGLE MATCH (TEAM-ONLY) RENDERING ---
-                matchTitleElement.textContent = `Match 1 Results (Team View)`;
+                matchTitleElement.textContent = `Match ${matchResults.length} Results (Team View)`;
                 headerRow.innerHTML = `
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team Name (Player 1)</th>
@@ -608,9 +653,7 @@
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Placement Pts.</th>
                 `;
 
-                const singleMatchResult = matchResults[0];
-
-                // Sort by rank for single match view
+                const singleMatchResult = matchResults[matchResults.length - 1]; // Show the latest match
                 singleMatchResult.sort((a, b) => a.rank - b.rank);
 
                 singleMatchResult.forEach((teamResult) => {
@@ -620,24 +663,21 @@
                     const player1Name = teamResult.players[0] ? teamResult.players[0].name.trim() : "N/A";
                     const placementPts = calculatePlacementPoints(teamResult.rank);
                     const totalPts = teamResult.total_kills + placementPts;
-                    // const teamId = getTeamIdFromPlayerName(player1Name);
 
                     row.innerHTML += `<td class="px-4 py-3 text-center text-xl font-extrabold text-fire">#${teamResult.rank}</td>`;
                     row.innerHTML += `<td class="px-4 py-3 text-left text-base font-medium break-words">${player1Name}</td>`;
                     row.innerHTML += `<td class="px-4 py-3 text-center text-lg font-black text-yellow-400">${totalPts}</td>`;
-                    row.innerHTML += `<td class="px-4 py-3 text-center text-base font-semibold text-gray-300">${teamResult.total_kills}</td>`; // Team Kills
+                    row.innerHTML += `<td class="px-4 py-3 text-center text-base font-semibold text-gray-300">${teamResult.total_kills}</td>`;
                     row.innerHTML += `<td class="px-4 py-3 text-center text-lg font-bold text-blue-400">${placementPts}</td>`;
                 });
             }
         }
 
 
-        async function handleFileUpload(files) {
+        window.handleFileUpload = async function(files) {
             if (files.length === 0) return;
             
             const file = files[0];
-            
-            // UI State: Loading
             const currentMatchNumber = matchResults.length + 1;
             uploadText.textContent = `Analyzing Match ${currentMatchNumber}: ${file.name}`;
             uploadError.classList.add('hidden');
@@ -658,7 +698,6 @@
                 renderResults();
                 resultsDisplay.classList.remove('hidden');
 
-                // Update control buttons
                 resetButton.classList.remove('hidden');
                 nextSSButton.classList.remove('hidden'); 
                 mvpButton.classList.remove('hidden');
@@ -671,13 +710,23 @@
                 uploadError.classList.remove('hidden');
                 document.getElementById('screenshot-upload').value = '';
             } finally {
-                // UI State: Done
                 loader.classList.add('hidden');
                 loader.classList.remove('flex');
             }
         }
 
-        window.onload = checkLocalServer;
+        // Main App initialization function called after successful authentication
+        function initializeAppAfterAuth() {
+            calculateCumulativeTeamStats();
+            renderResults(); // Calls renderResults, which now correctly shows the placeholder if matchResults is empty.
+        }
+
+        // Ensure the login view is shown initially
+        if (!auth.currentUser) {
+            appContainer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+        }
+
     </script>
 </body>
 </html>
