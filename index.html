@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Fire Battle Stats Analyzer</title>
-    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     
-    <!-- ========================================================================= -->
-    <!-- CSS SECTION: Content for style.css                                        -->
-    <!-- ========================================================================= -->
     <style>
         :root {
             --primary-color: #EF4444; /* Red 500 - Fire */
@@ -49,40 +45,61 @@
         }
 
         /* MVP Modal Styling */
-        .mvp-modal-bg {
-             background: rgba(0, 0, 0, 0.85);
-        }
+        .mvp-modal-bg { background: rgba(0, 0, 0, 0.85); }
         .mvp-banner {
             background: linear-gradient(135deg, #1A202C 0%, #374151 100%);
             border: 4px solid var(--secondary-color);
             box-shadow: 0 0 40px rgba(251, 191, 36, 0.5);
             animation: pulse 1.5s infinite alternate;
         }
-        .mvp-title-glow {
-            text-shadow: 0 0 15px var(--primary-color);
-        }
+        .mvp-title-glow { text-shadow: 0 0 15px var(--primary-color); }
         @keyframes pulse {
             0% { transform: scale(1.0); box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
             100% { transform: scale(1.02); box-shadow: 0 0 40px rgba(251, 191, 36, 0.7); }
         }
-        .flaming-skull {
-            filter: drop-shadow(0 0 10px var(--primary-color));
-        }
-
         .login-card {
             background-color: var(--card-color);
             border: 1px solid #374151;
         }
+
+        /* Styling for the Team Logo Display */
+        .team-logo-display {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            min-height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--secondary-color);
+            background-color: #374151;
+            overflow: hidden;
+            margin-right: 8px;
+        }
+
+        /* Styling for the MVP Player Picture */
+        #player-image-upload-container {
+            border: 3px solid var(--primary-color);
+            background-color: #000;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+        #mvp-player-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 
-<!-- ========================================================================= -->
-<!-- HTML BODY SECTION: Main document structure                                  -->
-<!-- ========================================================================= -->
 <body class="flex flex-col items-center justify-center p-4 sm:p-8">
 
-    <!-- Login Container (Default View) -->
-    <div id="login-container" class="w-full max-w-sm hidden">
+    <div id="login-container" class="w-full max-w-sm">
         <div class="login-card p-8 rounded-xl shadow-2xl">
             <h1 class="text-3xl font-extrabold text-center mb-6">
                 <span class="text-fire">LOGIN</span> REQUIRED
@@ -92,12 +109,12 @@
             <form id="login-form">
                 <div class="mb-5">
                     <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                    <input type="email" id="email" name="email" required placeholder="sarojxettri46@gmail.com"
+                    <input type="email" id="email" name="email" required placeholder="Enter demo email"
                            class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire transition-colors">
                 </div>
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="saroj123"
+                    <input type="password" id="password" name="password" required placeholder="Enter demo password"
                            class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire transition-colors">
                 </div>
                 
@@ -110,7 +127,6 @@
         </div>
     </div>
     
-    <!-- App Container (Hidden by default, shown after login) -->
     <div id="app-container" class="w-full max-w-4xl bg-gray-900 p-6 sm:p-10 rounded-xl shadow-2xl border border-gray-700 hidden">
         <header class="text-center mb-10">
             <h1 class="text-3xl sm:text-4xl font-extrabold mb-1">
@@ -119,7 +135,6 @@
             <p class="text-gray-400 text-sm sm:text-base">Upload your match result screenshot for automatic data extraction and team performance calculation.</p>
         </header>
 
-        <!-- Upload Area -->
         <div class="mb-8 p-6 bg-card-color rounded-lg border-2 border-dashed border-gray-600">
             <label for="screenshot-upload" class="block text-center cursor-pointer">
                 <div class="flex flex-col items-center p-4">
@@ -138,7 +153,23 @@
             <div id="upload-error" class="text-center text-sm mt-4 text-yellow-500 hidden font-bold"></div>
         </div>
 
-        <!-- Results Table -->
+        <div class="mb-8 p-6 bg-gray-800 rounded-lg shadow-inner">
+            <h2 class="text-xl font-bold mb-4 text-secondary-color">Team Logo Management</h2>
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-end">
+                <div class="flex-grow w-full sm:w-auto">
+                    <label for="team-id-input" class="block text-sm font-medium text-gray-300 mb-2">Team ID (e.g., GODL, FC, JSE)</label>
+                    <input type="text" id="team-id-input" placeholder="Enter Team ID" class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire transition-colors uppercase">
+                </div>
+                <div class="flex-grow w-full sm:w-auto">
+                    <label for="team-logo-upload" class="block text-sm font-medium text-gray-300 mb-2">Upload Logo (.png recommended)</label>
+                    <input type="file" id="team-logo-upload" accept="image/*" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-fire file:text-white hover:file:bg-red-700">
+                </div>
+                <button onclick="saveTeamLogo()" class="w-full sm:w-auto py-2 px-6 bg-secondary-color hover:bg-yellow-500 text-gray-900 font-bold rounded-lg transition-colors shadow-md mt-auto">
+                    Set Logo
+                </button>
+            </div>
+            <p id="logo-status" class="text-center text-sm mt-3 text-green-500 hidden font-bold"></p>
+        </div>
         <div id="results-display" class="">
             <h2 class="text-xl font-bold mb-4 text-fire border-b border-gray-700 pb-2">Match Results</h2>
             <div class="results-table-container rounded-lg shadow-xl">
@@ -153,17 +184,15 @@
                         </tr>
                     </thead>
                     <tbody id="results-body" class="bg-card-color divide-y divide-gray-700">
-                        <!-- Results injected here or placeholder text -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
         
-        <!-- Control Buttons -->
         <div id="control-buttons" class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
             <button id="reset-button" onclick="handleReset()" class="px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-colors shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 2a8 8 0 00-7.398 4.793l.006.012a1 1 0 001.764.484l.004-.007A6 6 0 1110 16a1 1 0 100 2 8 8 0 100-16zM8 9a1 1 0 112 0v5a1 1 0 11-2 0V9z" />
+                  <path d="M10 2a8 8 0 00-7.398 4.793l.006.012a1 1 0 101.764.484l.004-.007A6 6 0 1110 16a1 1 0 100 2 8 8 0 100-16zM8 9a1 1 0 112 0v5a1 1 0 11-2 0V9z" />
                 </svg>
                 Reset All Data
             </button>
@@ -183,20 +212,29 @@
 
     </div>
 
-    <!-- *** START: MVP Modal/Banner *** -->
     <div id="mvp-modal" class="fixed inset-0 mvp-modal-bg hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300" onclick="closeMVPModal()">
         <div id="mvp-content" class="mvp-banner p-8 rounded-2xl max-w-lg w-full text-white text-center" onclick="event.stopPropagation()">
             
             <div class="flex flex-col items-center">
-                <!-- Free Fire Character/Icon -->
-                <svg class="w-20 h-20 text-fire mb-4 flaming-skull" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0c.9 0 1.8 0 2.7 .1L343.3 54.3c35.2 2.1 66.8 20.3 90.7 48.2c16.2 19.3 27.2 40.5 32.7 62.9l13.7 54.7c2.5 9.9 1.6 20.4-2.6 29.8s-11.6 17.5-20.7 23.5l-68.7 46.1c-1.3 .9-2.7 1.6-4.1 2.2L352 384H160l-3.2-12.8c-1.4-.6-2.8-1.3-4.1-2.2L84.9 330.4c-9.1-6-16.7-14.4-20.7-23.8s-5.1-19.9-2.6-29.8l13.7-54.7c5.5-22.4 16.5-43.6 32.7-62.9c23.9-27.9 55.5-46.1 90.7-48.2L253.3 .1c.9 0 1.8 0 2.7 0zm19.8 195.1c0-1.8 1.8-3.3 4.8-4.5c.3 .1 .6 .2 .9 .4c.9 .4 1.7 1 2.5 1.6c.3 .2 .6 .4 .9 .6c1.6 1 3.2 2.1 4.7 3.3c3.4 2.8 6.7 5.8 9.9 9.1l43.8 45.4c21.2 20.9 39.5 45.5 54.2 73.1c.3 .5 .6 1 .9 1.4c2.2 3.8 4.2 7.9 5.8 12.1c.5 1.1 1.1 2.3 1.5 3.5c1 2.8 1.8 5.6 2.5 8.5c.5 2.1 .9 4.3 1.1 6.5c.1 .9 .2 1.9 .3 2.8l.2 3.4c.1 .9 .1 1.8 .1 2.8v3.4c0 1.9-.3 3.8-.8 5.6s-1.3 3.6-2.5 5.3s-2.5 3.2-4.1 4.7s-3.3 2.9-5.1 4.3c-2.4 1.8-4.9 3.4-7.5 4.9c-2.7 1.6-5.4 3-8.2 4.3c-2.8 1.2-5.7 2.3-8.7 3.2c-3 1-6 1.8-9.1 2.5c-3.1 .7-6.2 1.3-9.5 1.7c-3.2 .4-6.5 .6-9.8 .6c-3.3 0-6.6-.2-9.8-.6c-3.3-.4-6.6-1-9.8-1.7c-3.1-.7-6.1-1.5-9.1-2.5c-3-.9-5.9-2-8.7-3.2c-2.8-1.2-5.5-2.7-8.2-4.3c-2.6-1.5-5.1-3.1-7.5-4.9c-1.8-1.4-3.6-3-5.1-4.7s-2.8-3.5-4.1-5.3s-2-3.7-2.5-5.6s-.8-3.7-.8-5.6v-3.4c0-.9 0-1.8 .1-2.8l.2-3.4c.1-2.2 .5-4.4 1.1-6.5c.7-2.8 1.5-5.6 2.5-8.5c.5-1.2 1.1-2.4 1.5-3.5c1.6-4.2 3.6-8.3 5.8-12.1c.3-.5 .6-1 .9-1.4c14.7-27.6 33-52.2 54.2-73.1l43.8-45.4c3.2-3.3 6.5-6.3 9.9-9.1c1.5-1.2 3.1-2.3 4.7-3.3c.3-.2 .6-.4 .9-.6c.8-.6 1.6-1.2 2.5-1.6c.3-.2 .6-.3 .9-.4c3-.9 5.3-2.1 6.5-4.5zM224 416c0-17.7 14.3-32 32-32s32 14.3 32 32s-32 14.3-32 32s-32-14.3-32-32z"/></svg>
                 
                 <h3 class="text-4xl font-black mb-2 uppercase mvp-title-glow tracking-widest text-secondary-color">
                     OVERALL MVP
                 </h3>
-                <p class="text-2xl font-semibold mb-4 text-fire">Highest Kills in a Single Match</p>
+                <p class="text-lg font-semibold mb-4 text-gray-300">Highest Kills in a Single Match</p>
             </div>
             
+            <div id="player-image-upload-container" class="mb-6 mx-auto">
+                <img id="mvp-player-pic" src="" alt="MVP Player Picture" class="w-full h-full object-cover hidden">
+                
+                <label id="upload-label" for="player-pic-upload-input" class="cursor-pointer flex flex-col items-center text-gray-400 p-8 w-full h-full justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-secondary-color mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <p class="font-semibold text-sm text-yellow-500">Click to Upload Player Photo</p>
+                </label>
+                <input type="file" id="player-pic-upload-input" class="hidden" accept="image/*" onchange="handlePlayerImageUpload(this.files)">
+                
+                <p id="player-name-for-upload" class="hidden"></p> </div>
             <div class="bg-gray-900 p-6 rounded-xl border border-gray-700">
                 <p class="text-5xl font-extrabold text-secondary-color break-words" id="mvp-player-name">---</p>
                 <p class="text-lg mt-1 mb-4 text-gray-300">The Machine</p>
@@ -218,26 +256,20 @@
             </button>
         </div>
     </div>
-    <!-- *** END: MVP Modal/Banner *** -->
-
-    <!-- ========================================================================= -->
-    <!-- JAVASCRIPT SECTION: Core Logic and State Management                        -->
-    <!-- ========================================================================= -->
     <script type="module">
-        // FIX FOR LOCAL DEVELOPMENT: Safely import Firebase Modules
-        // These imports use ES6 modules and require a web server (like Live Server)
+        // --- Firebase Imports for Authentication ---
+        // NOTE: These are required by the canvas environment for execution but the core logic
+        // is designed to work in a sandbox even if the full Firebase environment isn't live.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // --- API KEY CONFIGURATION ---
-        // !!! CRITICAL FIX: You must replace the empty string below with your actual Gemini API Key !!!
+        // REPLACE with your actual Gemini API Key if deploying outside of a sandbox
         const API_KEY = "AIzaSyDIuR-NY9tEflgQzMOOlx-CZIfQPI8A8NQ"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
         
-        // --- FIREBASE CONFIGURATION (FIXED FOR LOCAL EXECUTION) ---
-        // We define placeholder global variables if they are not present (i.e., when running locally)
-        
-        // Define dummy config for local testing if global variable is missing
+        // --- FIREBASE CONFIGURATION (Mandatory Environment Vars Placeholder) ---
         const defaultFirebaseConfig = {
              apiKey: "AIzaSy_LOCAL_TESTING_KEY",
              authDomain: "local-testing.firebaseapp.com",
@@ -249,6 +281,10 @@
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        
+        // --- DEMO CREDENTIALS (Updated as requested) ---
+        const DEMO_EMAIL = "saroj@gmail.com"; 
+        const DEMO_PASSWORD = "1234";
         
         // --- DOM Elements ---
         const loginContainer = document.getElementById('login-container');
@@ -264,23 +300,22 @@
         const nextSSButton = document.getElementById('next-ss-button');
         const mvpButton = document.getElementById('mvp-button');
         const mvpModal = document.getElementById('mvp-modal');
-        
-        // --- State Variables ---
-        // Initializing with an empty array so the placeholder message shows on load.
+        const mvpPlayerPic = document.getElementById('mvp-player-pic');
+        const uploadLabel = document.getElementById('upload-label');
+        const playerPicUploadInput = document.getElementById('player-pic-upload-input');
+        const playerNameForUpload = document.getElementById('player-name-for-upload');
+        const teamIdInput = document.getElementById('team-id-input');
+        const teamLogoUpload = document.getElementById('team-logo-upload');
+        const logoStatus = document.getElementById('logo-status');
+
+        // --- State Variables (Local to this session) ---
         let matchResults = []; 
-        
         let cumulativeTeamStats = {};
+        let playerImageMap = {}; 
+        let teamLogoMap = {}; 
 
         // --- AUTHENTICATION LOGIC ---
 
-        // The specific credentials the user wants to use for the demo login
-        const DEMO_EMAIL = "sarojxettri46@gmail.com";
-        const DEMO_PASSWORD = "saroj123";
-
-        /**
-         * Simulates a login check for the demo environment. 
-         * If credentials match, sign in anonymously to proceed to the app.
-         */
         async function handleLogin(e) {
             e.preventDefault();
             loginError.classList.add('hidden');
@@ -289,26 +324,23 @@
             const passwordInput = document.getElementById('password').value.trim();
 
             if (emailInput === DEMO_EMAIL && passwordInput === DEMO_PASSWORD) {
-                // If credentials match the hardcoded demo values, sign in anonymously
-                // to proceed to the main app interface.
+                // Mocking successful login by trying to authenticate with Firebase
                 try {
-                    // NOTE: If using the default config, this sign-in will fail 
-                    // but the app should still proceed to the main screen 
-                    // thanks to the onAuthStateChanged logic below.
-                    await signInAnonymously(auth);
-                    // onAuthStateChanged will handle the view switch
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
                 } catch (error) {
-                    // For local testing, we ignore the anonymous sign-in failure 
-                    // but allow the app to proceed if the credentials are correct.
-                    console.log("Anonymous Sign-In failed (expected in local dev/mockup):", error.message);
-                    
-                    // Manually force the view switch for local testing 
-                    // since Firebase Auth might not fully initialize/complete the sign-in
-                    // when using a dummy configuration.
+                    console.error("Firebase Sign-In failed (expected in local dev/mockup):", error.message);
+                    // For sandboxed environments where a real Firebase setup might not exist:
                     if (firebaseConfig === defaultFirebaseConfig) {
                         loginContainer.classList.add('hidden');
                         appContainer.classList.remove('hidden');
                         initializeAppAfterAuth();
+                    } else {
+                        loginError.textContent = "Authentication service error. Check console.";
+                        loginError.classList.remove('hidden');
                     }
                 }
             } else {
@@ -317,30 +349,26 @@
             }
         }
         
-        // Event listener for the login form submission
         loginForm.addEventListener('submit', handleLogin);
 
-
-        /** Handles switching the view between the Login Page and the Main App. */
+        // Listener to show/hide the app based on authentication state
         onAuthStateChanged(auth, (user) => {
-            // Only switch views automatically if the user object is valid (i.e., signed in)
             if (user && user.uid) { 
                 loginContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 initializeAppAfterAuth();
             } else {
-                // If no user is authenticated, show the login form
                 appContainer.classList.add('hidden');
                 loginContainer.classList.remove('hidden');
             }
         });
 
 
-        // --- Utility & API Functions (Same as before, moved into a module) ---
+        // --- Utility & API Functions ---
         
         function getTeamIdFromPlayerName(playerName) {
             if (!playerName) return "Unknown Team";
-            let standardizedName = playerName.trim().toUpperCase().replace(/[^A-Z]/g, '');
+            let standardizedName = playerName.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
             const prefixes = ['JSE', 'AMF', 'FC', 'GODL', 'LS', 'TH1', 'MADS', 'NE', 'TEROX'];
             for (const prefix of prefixes) {
                 if (standardizedName.startsWith(prefix)) {
@@ -376,6 +404,15 @@
             });
         }
         
+        function fileToDataUrl(file) {
+             return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+        
         async function fetchWithRetry(url, options, maxRetries = 3) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
@@ -403,12 +440,7 @@
 
         async function fetchOCRData(base64Data, mimeType) {
             
-            // Check if API key is present before calling
-            if (API_KEY === "") {
-                throw new Error("API Key is missing. Please update the 'API_KEY' constant in the code.");
-            }
-
-            const systemPrompt = `You are a Free Fire match result data extractor. Analyze the attached screenshot of the match results screen. Extract the data for all displayed teams/ranks.
+            const systemPrompt = `You are a Free Fire match result data extractor. Analyze the attached screenshot of the match results screen. Extract the data for all displayed teams/ranks. 
             
             Schema Mandate: Return the results as a single JSON array.
             
@@ -423,7 +455,7 @@
             - 'name' (STRING): The player's in-game name.
             - 'kills' (NUMBER): The player's individual eliminations count.
             
-            Crucial Note: Ensure all players' data are grouped under the correct rank object. Calculate 'total_kills' by summing the individual kills. Be precise with player names and kill counts.`;
+            Crucial Note: Use English only for any text extracted (such as player names), ensuring Latin characters and standard formatting. Ensure all players' data are grouped under the correct rank object. Calculate 'total_kills' by summing the individual kills. Be precise with player names and kill counts.`;
 
             const payload = {
                 contents: [
@@ -463,9 +495,12 @@
                             required: ["rank", "players", "total_kills"]
                         }
                     }
+                },
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
                 }
             };
-
+            
             const response = await fetchWithRetry(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -478,6 +513,7 @@
                 throw new Error("API response was missing expected content.");
             }
             
+            // Clean up Markdown formatting that the model sometimes wraps around JSON
             jsonString = jsonString.trim();
             if (jsonString.startsWith('```json')) {
                 jsonString = jsonString.substring(7);
@@ -500,6 +536,8 @@
         window.handleReset = function() {
             matchResults = [];
             cumulativeTeamStats = {};
+            playerImageMap = {}; 
+            teamLogoMap = {}; 
             resultsBody.innerHTML = '';
             resultsDisplay.classList.remove('hidden');
             uploadError.classList.add('hidden');
@@ -519,9 +557,15 @@
         function calculateCumulativeTeamStats() {
             cumulativeTeamStats = {};
             
-            matchResults.forEach((matchData) => {
-                matchData.forEach(team => {
-                    const teamId = getTeamIdFromPlayerName(team.players[0] ? team.players[0].name : "");
+            matchResults.forEach((matchContainer, matchIndex) => {
+                const matchKey = matchIndex; 
+                
+                matchContainer.data.forEach(team => {
+                    const player1Name = team.players[0] ? team.players[0].name : "";
+                    const teamId = getTeamIdFromPlayerName(player1Name);
+                    
+                    if (!teamId || team.rank <= 0) return; 
+
                     const teamKills = team.total_kills;
                     const placementPoints = calculatePlacementPoints(team.rank);
                     const totalPoints = teamKills + placementPoints;
@@ -529,14 +573,20 @@
                     if (!cumulativeTeamStats[teamId]) {
                         cumulativeTeamStats[teamId] = {
                             standardName: teamId, 
-                            primaryPlayerName: team.players[0] ? team.players[0].name.trim() : "Unknown Player", 
+                            primaryPlayerName: player1Name.trim(), 
                             totalPoints: 0, 
-                            totalMatches: 0,
+                            matchesPlayed: 0,
+                            matchRanks: {} 
                         };
                     }
 
                     cumulativeTeamStats[teamId].totalPoints += totalPoints;
-                    cumulativeTeamStats[teamId].totalMatches += 1;
+                    
+                    // Count match only once per unique match
+                    if (!cumulativeTeamStats[teamId].matchRanks[matchKey]) {
+                        cumulativeTeamStats[teamId].matchesPlayed += 1;
+                        cumulativeTeamStats[teamId].matchRanks[matchKey] = team.rank;
+                    }
                 });
             });
         }
@@ -545,19 +595,23 @@
             let bestPlayer = {
                 name: "N/A",
                 kills: -1,
-                matchNumber: 0
+                matchNumber: 0,
             };
 
-            matchResults.forEach((matchData, matchIndex) => {
+            matchResults.forEach((matchContainer, matchIndex) => {
+                const matchData = matchContainer.data;
+                
                 if (Array.isArray(matchData)) {
                     matchData.forEach(team => {
                         if (team && Array.isArray(team.players)) {
                             team.players.forEach(player => {
+                                const cleanedName = player.name ? player.name.trim() : "Unnamed Player";
+
                                 if (player && player.kills > bestPlayer.kills) {
                                     bestPlayer = {
-                                        name: player.name ? player.name.trim() : "Unnamed Player",
+                                        name: cleanedName,
                                         kills: player.kills,
-                                        matchNumber: matchIndex + 1
+                                        matchNumber: matchIndex + 1,
                                     };
                                 }
                             });
@@ -581,8 +635,46 @@
             document.getElementById('mvp-kills').textContent = mvp.kills > -1 ? mvp.kills : 0;
             document.getElementById('mvp-match').textContent = `Match #${mvp.matchNumber}`;
             
+            playerNameForUpload.textContent = mvp.name; 
+
+            const playerPicUrl = playerImageMap[mvp.name];
+
+            if (playerPicUrl) {
+                mvpPlayerPic.src = playerPicUrl;
+                mvpPlayerPic.classList.remove('hidden');
+                uploadLabel.classList.add('hidden');
+            } else {
+                mvpPlayerPic.classList.add('hidden');
+                uploadLabel.classList.remove('hidden');
+            }
+            
             mvpModal.classList.remove('hidden');
             mvpModal.style.opacity = '1';
+        }
+
+        window.handlePlayerImageUpload = async function(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            const playerName = playerNameForUpload.textContent; 
+
+            if (!playerName || playerName === 'N/A') {
+                console.error("Cannot upload image: MVP name not determined or is N/A.");
+                return;
+            }
+
+            try {
+                const dataUrl = await fileToDataUrl(file); 
+                playerImageMap[playerName] = dataUrl;
+                
+                mvpPlayerPic.src = dataUrl;
+                mvpPlayerPic.classList.remove('hidden');
+                uploadLabel.classList.add('hidden');
+                
+                playerPicUploadInput.value = ''; 
+                
+            } catch (error) {
+                console.error("Error processing player image upload:", error);
+            }
         }
 
         window.closeMVPModal = function() {
@@ -592,11 +684,53 @@
             }, 300); 
         }
 
+        window.saveTeamLogo = async function() {
+            const teamId = teamIdInput.value.trim().toUpperCase();
+            const files = teamLogoUpload.files;
+            logoStatus.classList.add('hidden');
+
+            if (!teamId) {
+                logoStatus.textContent = "Please enter a Team ID.";
+                logoStatus.classList.remove('hidden');
+                logoStatus.classList.remove('text-green-500');
+                logoStatus.classList.add('text-red-500');
+                return;
+            }
+            
+            if (files.length === 0) {
+                logoStatus.textContent = "Please select a logo file.";
+                logoStatus.classList.remove('hidden');
+                logoStatus.classList.remove('text-green-500');
+                logoStatus.classList.add('text-red-500');
+                return;
+            }
+
+            try {
+                const dataUrl = await fileToDataUrl(files[0]);
+                teamLogoMap[teamId] = dataUrl;
+                
+                logoStatus.textContent = `Logo set successfully for Team ID: ${teamId}!`;
+                logoStatus.classList.remove('hidden');
+                logoStatus.classList.remove('text-red-500');
+                logoStatus.classList.add('text-green-500');
+                
+                teamIdInput.value = '';
+                teamLogoUpload.value = '';
+                
+                renderResults(); 
+                
+            } catch (error) {
+                logoStatus.textContent = "Failed to process logo file.";
+                logoStatus.classList.remove('hidden');
+                logoStatus.classList.remove('text-green-500');
+                logoStatus.classList.add('text-red-500');
+            }
+        }
+
         function renderResults() {
             resultsBody.innerHTML = '';
             
             if (matchResults.length === 0) {
-                // This is the placeholder text when no data has been uploaded yet
                 resultsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Upload a screenshot to begin analysis.</td></tr>`;
                 document.querySelector('#results-display h2').textContent = `Match Results`;
                 return;
@@ -611,14 +745,14 @@
                 headerRow.innerHTML = `
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-4/12">Team ID (Example Player)</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kill + Placement)</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Total Points (Kills + Placement)</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-2/12">Matches Played</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Avg. PPM</th>
                 `;
                 
                 const teamsToRender = Object.values(cumulativeTeamStats).map(stats => ({
                     ...stats,
-                    avgPPM: (stats.totalPoints / stats.totalMatches).toFixed(2),
+                    avgPPM: stats.matchesPlayed > 0 ? (stats.totalPoints / stats.matchesPlayed).toFixed(2) : '0.00',
                 }));
                 
                 teamsToRender.sort((a, b) => b.totalPoints - a.totalPoints);
@@ -628,13 +762,20 @@
                      row.className = 'hover:bg-gray-700 transition duration-150';
                      const rank = index + 1;
                      const rankClass = rank === 1 ? 'text-secondary-color text-2xl' : (rank <= 3 ? 'text-yellow-500 text-xl' : 'text-fire');
+                     
+                     const logoUrl = teamLogoMap[teamStats.standardName];
+                     const logoHtml = logoUrl ? `<div class="team-logo-display"><img src="${logoUrl}" alt="${teamStats.standardName} Logo" class="w-full h-full object-contain p-0.5"></div>` : '<div class="team-logo-display bg-gray-600 flex items-center justify-center text-xs">?</div>';
+
                      row.innerHTML += `<td class="px-4 py-3 text-center font-extrabold ${rankClass}">#${rank}</td>`;
-                     row.innerHTML += `<td class="px-4 py-2 text-left text-base font-medium break-words">
-                        <span class="font-bold text-fire">${teamStats.standardName}</span>
-                        <span class="text-xs text-gray-400 block">(${teamStats.primaryPlayerName})</span>
+                     row.innerHTML += `<td class="px-4 py-2 text-left text-base font-medium break-words flex items-center">
+                        ${logoHtml}
+                        <div>
+                           <span class="font-bold text-fire">${teamStats.standardName}</span>
+                           <span class="text-xs text-gray-400 block">(${teamStats.primaryPlayerName})</span>
+                        </div>
                      </td>`;
                      row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-black text-yellow-400">${teamStats.totalPoints}</td>`;
-                     row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-gray-300">${teamStats.totalMatches}</td>`;
+                     row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-gray-300">${teamStats.matchesPlayed}</td>`;
                      row.innerHTML += `<td class="px-4 py-2 text-center text-lg font-bold text-blue-400">${teamStats.avgPPM}</td>`;
                 });
 
@@ -644,6 +785,7 @@
 
 
             } else {
+                // Single match view logic 
                 matchTitleElement.textContent = `Match ${matchResults.length} Results (Team View)`;
                 headerRow.innerHTML = `
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">Rank</th>
@@ -653,19 +795,30 @@
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-3/12">Placement Pts.</th>
                 `;
 
-                const singleMatchResult = matchResults[matchResults.length - 1]; // Show the latest match
+                const singleMatchResult = matchResults[matchResults.length - 1].data; 
                 singleMatchResult.sort((a, b) => a.rank - b.rank);
 
                 singleMatchResult.forEach((teamResult) => {
-                    const row = resultsBody.insertRow();
-                    row.className = 'hover:bg-gray-700 transition duration-150';
-                    
                     const player1Name = teamResult.players[0] ? teamResult.players[0].name.trim() : "N/A";
                     const placementPts = calculatePlacementPoints(teamResult.rank);
                     const totalPts = teamResult.total_kills + placementPts;
+                    const teamId = getTeamIdFromPlayerName(player1Name);
+                    
+                    const row = resultsBody.insertRow();
+                    row.className = 'hover:bg-gray-700 transition duration-150';
+                    
+                    const logoUrl = teamLogoMap[teamId];
+                    const logoHtml = logoUrl ? `<div class="team-logo-display"><img src="${logoUrl}" alt="${teamId} Logo" class="w-full h-full object-contain p-0.5"></div>` : '<div class="team-logo-display bg-gray-600 flex items-center justify-center text-xs">?</div>';
+
 
                     row.innerHTML += `<td class="px-4 py-3 text-center text-xl font-extrabold text-fire">#${teamResult.rank}</td>`;
-                    row.innerHTML += `<td class="px-4 py-3 text-left text-base font-medium break-words">${player1Name}</td>`;
+                    row.innerHTML += `<td class="px-4 py-3 text-left text-base font-medium break-words flex items-center">
+                        ${logoHtml}
+                        <div>
+                            <span class="font-bold text-white">${player1Name}</span>
+                            <span class="text-xs text-gray-400 block">(${teamId})</span>
+                        </div>
+                    </td>`;
                     row.innerHTML += `<td class="px-4 py-3 text-center text-lg font-black text-yellow-400">${totalPts}</td>`;
                     row.innerHTML += `<td class="px-4 py-3 text-center text-base font-semibold text-gray-300">${teamResult.total_kills}</td>`;
                     row.innerHTML += `<td class="px-4 py-3 text-center text-lg font-bold text-blue-400">${placementPts}</td>`;
@@ -687,11 +840,12 @@
             
             try {
                 const base64Data = await fileToBase64(file);
+                const dataUrl = await fileToDataUrl(file); 
                 const mimeType = file.type;
                 
                 const data = await fetchOCRData(base64Data, mimeType);
                 
-                matchResults.push(data);
+                matchResults.push({ data: data, imageUrl: dataUrl }); 
                 
                 calculateCumulativeTeamStats();
                 
@@ -715,13 +869,11 @@
             }
         }
 
-        // Main App initialization function called after successful authentication
         function initializeAppAfterAuth() {
             calculateCumulativeTeamStats();
-            renderResults(); // Calls renderResults, which now correctly shows the placeholder if matchResults is empty.
+            renderResults(); 
         }
 
-        // Ensure the login view is shown initially
         if (!auth.currentUser) {
             appContainer.classList.add('hidden');
             loginContainer.classList.remove('hidden');
